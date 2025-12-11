@@ -1071,10 +1071,32 @@ const colors = mockColors;
 	}
 
 	function applyFilters() {
+		console.log('Applying filters:', currentFilters);
+		console.log('All products:', allProducts.length);
+
 		filteredProducts = allProducts.filter(product => {
-			// Category filter
+			// Category filter - category is an object with id, name, slug
 			if (currentFilters.categories.length > 0) {
-				if (!currentFilters.categories.includes(product.category.toLowerCase())) {
+				const categoryId = typeof product.category === 'object' ? product.category.id : product.category;
+				if (!currentFilters.categories.includes(categoryId)) {
+					return false;
+				}
+			}
+
+			// Size filter
+			if (currentFilters.sizes.length > 0) {
+				const productSizeIds = product.sizes?.map((s: any) => s.id) || [];
+				const hasMatchingSize = currentFilters.sizes.some((sizeId: string) => productSizeIds.includes(sizeId));
+				if (!hasMatchingSize) {
+					return false;
+				}
+			}
+
+			// Color filter
+			if (currentFilters.colors.length > 0) {
+				const productColorIds = product.colors?.map((c: any) => c.id) || [];
+				const hasMatchingColor = currentFilters.colors.some((colorId: string) => productColorIds.includes(colorId));
+				if (!hasMatchingColor) {
 					return false;
 				}
 			}
@@ -1103,6 +1125,7 @@ const colors = mockColors;
 			return true;
 		});
 
+		console.log('Filtered products:', filteredProducts.length);
 		renderProducts();
 		updateActiveFiltersTags();
 	}
