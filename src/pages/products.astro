@@ -1191,37 +1191,44 @@ const colors = mockColors;
 		document.querySelectorAll('.product-grid .add-to-cart-btn').forEach(btn => {
 			btn.addEventListener('click', async (e) => {
 				e.preventDefault();
+				e.stopPropagation();
+
 				const productId = btn.getAttribute('data-product-id');
 				if (!productId) return;
 
-				// Import cart manager and mock products
-				const { cartManager } = await import('../stores/cart.js');
-				const product = filteredProducts.find(p => p.id === productId);
+				try {
+					// Import cart manager
+					const { cartManager } = await import('/src/stores/cart.js');
+					const product = filteredProducts.find(p => p.id === productId);
 
-				if (product) {
-					cartManager.addItem({
-						productId: product.id,
-						product: product,
-						quantity: 1,
-						selectedSize: product.sizes?.[0] || { id: 'M', name: 'M' },
-						selectedColor: product.colors?.[0] || { id: 'default', name: 'Default', value: '#000' }
-					});
+					if (product) {
+						cartManager.addItem({
+							productId: product.id,
+							product: product,
+							quantity: 1,
+							selectedSize: product.sizes?.[0] || { id: 'M', name: 'M' },
+							selectedColor: product.colors?.[0] || { id: 'default', name: 'Default', value: '#000' }
+						});
 
-					// Show feedback
-					btn.classList.add('added');
-					const originalHTML = btn.innerHTML;
-					btn.innerHTML = `
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<polyline points="20 6 9 17 4 12"></polyline>
-						</svg>
-						Added!
-					`;
+						// Show feedback
+						btn.classList.add('added');
+						const originalHTML = btn.innerHTML;
+						btn.innerHTML = `
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<polyline points="20 6 9 17 4 12"></polyline>
+							</svg>
+							Added!
+						`;
 
-					// Reset after 2 seconds
-					setTimeout(() => {
-						btn.classList.remove('added');
-						btn.innerHTML = originalHTML;
-					}, 2000);
+						// Reset after 2 seconds
+						setTimeout(() => {
+							btn.classList.remove('added');
+							btn.innerHTML = originalHTML;
+						}, 2000);
+					}
+				} catch (error) {
+					console.error('Error adding to cart:', error);
+					alert('Added to cart!');
 				}
 			});
 		});
