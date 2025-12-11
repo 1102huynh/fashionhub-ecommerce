@@ -3,9 +3,13 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --port 4321",
+    "dev:frontend": "astro dev --port 4321",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "build": "astro build",
-    "preview": "astro preview",
+    "build:all": "astro build && cd backend && npm run build",
+    "preview": "astro preview --port 4321",
     "astro": "astro"
   },
   "dependencies": {

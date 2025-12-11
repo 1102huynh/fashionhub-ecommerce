@@ -23,7 +23,8 @@ async function bootstrap() {
   // API prefix
   app.setGlobalPrefix('api');
 
-  const port = process.env.PORT || 3001;
+  // Fixed port - no fallback to avoid random ports
+  const port = 3001;
   await app.listen(port);
 
   console.log(`🚀 FashionHub Backend running on: http://localhost:${port}`);

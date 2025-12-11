@@ -10,7 +10,8 @@ export default defineConfig({
   }),
   server: {
     port: 4321,
-    host: true
+    host: true,
+    strictPort: true, // Don't use random port if 4321 is taken
   },
   vite: {
     define: {
