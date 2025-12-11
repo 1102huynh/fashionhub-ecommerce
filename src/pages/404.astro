@@ -1,0 +1,185 @@
+---
+import EcommerceLayout from '../layouts/EcommerceLayout.astro';
+---
+
+<EcommerceLayout title="Page Not Found - FashionHub" description="The page you're looking for doesn't exist">
+	<div class="error-container">
+		<div class="error-content">
+			<div class="error-illustration">
+				<span class="error-number">404</span>
+				<div class="error-icon">🔍</div>
+			</div>
+
+			<h1>Page Not Found</h1>
+			<p class="error-message">
+				Oops! The page you're looking for seems to have wandered off the runway.
+			</p>
+
+			<div class="error-actions">
+				<a href="/" class="btn btn-primary">Go to Homepage</a>
+				<a href="/products" class="btn btn-outline">Browse Products</a>
+			</div>
+
+			<div class="suggestions">
+				<h3>Popular Categories</h3>
+				<div class="category-links">
+					<a href="/products?category=men" class="category-link">Men's Collection</a>
+					<a href="/products?category=women" class="category-link">Women's Collection</a>
+					<a href="/products?filter=sale" class="category-link">Sale Items</a>
+					<a href="/products?filter=new" class="category-link">New Arrivals</a>
+				</div>
+			</div>
+
+			<div class="help-section">
+				<p>Need help? <a href="/contact">Contact our support team</a></p>
+			</div>
+		</div>
+	</div>
+</EcommerceLayout>
+
+<style>
+	.error-container {
+		min-height: 70vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 2rem 1rem;
+	}
+
+	.error-content {
+		max-width: 600px;
+		text-align: center;
+	}
+
+	.error-illustration {
+		position: relative;
+		margin-bottom: 2rem;
+	}
+
+	.error-number {
+		font-size: 10rem;
+		font-weight: 900;
+		background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		line-height: 1;
+		display: block;
+		margin-bottom: 1rem;
+		animation: float 3s ease-in-out infinite;
+	}
+
+	@keyframes float {
+		0%, 100% { transform: translateY(0); }
+		50% { transform: translateY(-20px); }
+	}
+
+	.error-icon {
+		font-size: 4rem;
+		animation: spin 4s linear infinite;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+
+	h1 {
+		font-size: 2.5rem;
+		margin-bottom: 1rem;
+		color: var(--text-color);
+	}
+
+	.error-message {
+		font-size: 1.125rem;
+		color: var(--secondary-color);
+		margin-bottom: 2rem;
+		line-height: 1.6;
+	}
+
+	.error-actions {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		margin-bottom: 3rem;
+		flex-wrap: wrap;
+	}
+
+	.error-actions .btn {
+		padding: 1rem 2rem;
+	}
+
+	.suggestions {
+		background: var(--card-background);
+		padding: 2rem;
+		border-radius: 1rem;
+		border: 1px solid var(--border-color);
+		margin-bottom: 2rem;
+	}
+
+	.suggestions h3 {
+		margin-bottom: 1.5rem;
+		font-size: 1.25rem;
+	}
+
+	.category-links {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+		gap: 1rem;
+	}
+
+	.category-link {
+		padding: 0.75rem 1rem;
+		background: white;
+		border: 1px solid var(--border-color);
+		border-radius: 0.5rem;
+		text-decoration: none;
+		color: var(--text-color);
+		font-weight: 500;
+		transition: all 0.2s;
+	}
+
+	.category-link:hover {
+		background: var(--primary-color);
+		color: white;
+		transform: translateY(-2px);
+		border-color: var(--primary-color);
+	}
+
+	.help-section {
+		color: var(--secondary-color);
+	}
+
+	.help-section a {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 600;
+	}
+
+	.help-section a:hover {
+		text-decoration: underline;
+	}
+
+	@media (max-width: 768px) {
+		.error-number {
+			font-size: 6rem;
+		}
+
+		h1 {
+			font-size: 2rem;
+		}
+
+		.error-actions {
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.error-actions .btn {
+			width: 100%;
+		}
+
+		.category-links {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+</style>
+

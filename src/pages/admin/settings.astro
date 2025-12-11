@@ -1,0 +1,195 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Settings">
+  <div class="settings-container">
+    <!-- General Settings -->
+    <div class="settings-section">
+      <h2>General Settings</h2>
+      <div class="settings-card">
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Store Name</h4>
+            <p>The name of your store</p>
+          </div>
+          <input type="text" value="FashionHub" class="setting-input">
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Store Email</h4>
+            <p>Primary contact email</p>
+          </div>
+          <input type="email" value="support@fashionhub.com" class="setting-input">
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Currency</h4>
+            <p>Default currency for products</p>
+          </div>
+          <select class="setting-input">
+            <option value="USD">USD - US Dollar</option>
+            <option value="EUR">EUR - Euro</option>
+            <option value="GBP">GBP - British Pound</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Settings -->
+    <div class="settings-section">
+      <h2>Notifications</h2>
+      <div class="settings-card">
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Order Notifications</h4>
+            <p>Receive emails when new orders are placed</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Low Stock Alerts</h4>
+            <p>Get notified when product stock is low</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Customer Reviews</h4>
+            <p>Email notifications for new reviews</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Button -->
+    <div class="settings-actions">
+      <button class="btn btn-primary" onclick="alert('Settings saved!')">
+        💾 Save Changes
+      </button>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .settings-container {
+    max-width: 800px;
+  }
+
+  .settings-section {
+    margin-bottom: 2rem;
+  }
+
+  .settings-section h2 {
+    margin-bottom: 1rem;
+  }
+
+  .settings-card {
+    background: white;
+    border-radius: 0.75rem;
+    border: 1px solid var(--admin-border);
+    padding: 1.5rem;
+  }
+
+  .setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--admin-border);
+  }
+
+  .setting-item:last-child {
+    border-bottom: none;
+  }
+
+  .setting-info h4 {
+    margin-bottom: 0.25rem;
+  }
+
+  .setting-info p {
+    font-size: 0.875rem;
+    color: var(--admin-text-secondary);
+  }
+
+  .setting-input {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 0.5rem;
+    min-width: 200px;
+  }
+
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+  }
+
+  .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 28px;
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
+
+  .toggle input:checked + .toggle-slider {
+    background-color: var(--admin-primary);
+  }
+
+  .toggle input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+  }
+
+  .settings-actions {
+    margin-top: 2rem;
+  }
+
+  .btn {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--admin-primary);
+    color: white;
+  }
+</style>
+

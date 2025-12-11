@@ -1,0 +1,394 @@
+---
+import EcommerceLayout from '../layouts/EcommerceLayout.astro';
+---
+
+<EcommerceLayout title="Contact Us - FashionHub" description="Get in touch with FashionHub. We're here to help with your shopping questions and support needs.">
+	<div class="breadcrumb">
+		<a href="/">Home</a>
+		<span class="breadcrumb-separator">/</span>
+		<span>Contact</span>
+	</div>
+
+	<div class="contact-page">
+		<div class="page-header">
+			<h1>Contact Us</h1>
+			<p>We'd love to hear from you! Get in touch with our team.</p>
+		</div>
+
+		<div class="contact-grid">
+			<div class="contact-info">
+				<h2>Get In Touch</h2>
+				<div class="contact-methods">
+					<div class="contact-item">
+						<div class="contact-icon">📧</div>
+						<div>
+							<h3>Email</h3>
+							<p>support@fashionhub.com</p>
+							<p>sales@fashionhub.com</p>
+						</div>
+					</div>
+
+					<div class="contact-item">
+						<div class="contact-icon">📞</div>
+						<div>
+							<h3>Phone</h3>
+							<p>Customer Service: +1 (555) 123-4567</p>
+							<p>Sales: +1 (555) 123-4568</p>
+						</div>
+					</div>
+
+					<div class="contact-item">
+						<div class="contact-icon">📍</div>
+						<div>
+							<h3>Address</h3>
+							<p>123 Fashion Street<br>
+							New York, NY 10001<br>
+							United States</p>
+						</div>
+					</div>
+
+					<div class="contact-item">
+						<div class="contact-icon">🕒</div>
+						<div>
+							<h3>Business Hours</h3>
+							<p>Monday - Friday: 9:00 AM - 6:00 PM EST</p>
+							<p>Saturday: 10:00 AM - 4:00 PM EST</p>
+							<p>Sunday: Closed</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="social-links">
+					<h3>Follow Us</h3>
+					<div class="social-icons">
+						<a href="#" class="social-link">📘 Facebook</a>
+						<a href="#" class="social-link">📸 Instagram</a>
+						<a href="#" class="social-link">🐦 Twitter</a>
+						<a href="#" class="social-link">💼 LinkedIn</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="contact-form-container">
+				<h2>Send Us a Message</h2>
+				<form class="contact-form" onsubmit="handleContactForm(event)">
+					<div class="form-group">
+						<label for="name">Full Name *</label>
+						<input type="text" id="name" name="name" required>
+					</div>
+
+					<div class="form-group">
+						<label for="email">Email *</label>
+						<input type="email" id="email" name="email" required>
+					</div>
+
+					<div class="form-group">
+						<label for="phone">Phone</label>
+						<input type="tel" id="phone" name="phone">
+					</div>
+
+					<div class="form-group">
+						<label for="subject">Subject *</label>
+						<select id="subject" name="subject" required>
+							<option value="">Select a subject</option>
+							<option value="general">General Inquiry</option>
+							<option value="order">Order Support</option>
+							<option value="returns">Returns & Exchanges</option>
+							<option value="products">Product Questions</option>
+							<option value="technical">Technical Support</option>
+							<option value="partnership">Partnership Opportunities</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="message">Message *</label>
+						<textarea id="message" name="message" rows="6" placeholder="Please describe your inquiry in detail..." required></textarea>
+					</div>
+
+					<div class="form-group">
+						<label class="checkbox-label">
+							<input type="checkbox" name="newsletter" id="newsletter">
+							<span class="checkmark"></span>
+							Subscribe to our newsletter for updates and special offers
+						</label>
+					</div>
+
+					<button type="submit" class="btn submit-btn">Send Message</button>
+				</form>
+			</div>
+		</div>
+
+		<div class="faq-section">
+			<h2>Frequently Asked Questions</h2>
+			<div class="faq-grid">
+				<div class="faq-item">
+					<h3>How can I track my order?</h3>
+					<p>You can track your order using the tracking number sent to your email, or log into your account to view order status.</p>
+				</div>
+				<div class="faq-item">
+					<h3>What is your return policy?</h3>
+					<p>We offer 30-day hassle-free returns on all items in original condition with tags attached.</p>
+				</div>
+				<div class="faq-item">
+					<h3>Do you offer international shipping?</h3>
+					<p>Yes, we ship to most countries worldwide. Shipping costs and delivery times vary by location.</p>
+				</div>
+				<div class="faq-item">
+					<h3>How do I find my size?</h3>
+					<p>Check our size guide on each product page, or contact our support team for personalized sizing assistance.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</EcommerceLayout>
+
+<style>
+	.contact-page {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 2rem 0;
+	}
+
+	.page-header {
+		text-align: center;
+		margin-bottom: 3rem;
+	}
+
+	.page-header h1 {
+		font-size: 2.5rem;
+		margin-bottom: 1rem;
+		color: var(--text-color);
+	}
+
+	.page-header p {
+		font-size: 1.1rem;
+		color: var(--secondary-color);
+	}
+
+	.contact-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 4rem;
+		margin-bottom: 4rem;
+	}
+
+	.contact-info h2,
+	.contact-form-container h2 {
+		margin-bottom: 2rem;
+		color: var(--text-color);
+	}
+
+	.contact-methods {
+		margin-bottom: 3rem;
+	}
+
+	.contact-item {
+		display: flex;
+		gap: 1rem;
+		margin-bottom: 2rem;
+		padding: 1.5rem;
+		background: var(--card-background);
+		border-radius: 0.5rem;
+		border: 1px solid var(--border-color);
+	}
+
+	.contact-icon {
+		font-size: 2rem;
+		flex-shrink: 0;
+	}
+
+	.contact-item h3 {
+		margin-bottom: 0.5rem;
+		color: var(--primary-color);
+	}
+
+	.contact-item p {
+		margin: 0.25rem 0;
+		color: var(--secondary-color);
+	}
+
+	.social-links h3 {
+		margin-bottom: 1rem;
+	}
+
+	.social-icons {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.social-link {
+		padding: 0.5rem 1rem;
+		background: var(--card-background);
+		border: 1px solid var(--border-color);
+		border-radius: 0.5rem;
+		text-decoration: none;
+		color: var(--text-color);
+		transition: all 0.2s;
+	}
+
+	.social-link:hover {
+		background: var(--primary-color);
+		color: white;
+		transform: translateY(-2px);
+	}
+
+	.contact-form-container {
+		background: white;
+		padding: 2rem;
+		border-radius: 1rem;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+		border: 1px solid var(--border-color);
+	}
+
+	.contact-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.form-group label {
+		margin-bottom: 0.5rem;
+		font-weight: 600;
+		color: var(--text-color);
+	}
+
+	.form-group input,
+	.form-group select,
+	.form-group textarea {
+		padding: 0.75rem;
+		border: 2px solid var(--border-color);
+		border-radius: 0.5rem;
+		font-size: 1rem;
+		transition: border-color 0.2s;
+	}
+
+	.form-group input:focus,
+	.form-group select:focus,
+	.form-group textarea:focus {
+		outline: none;
+		border-color: var(--primary-color);
+	}
+
+	.checkbox-label {
+		display: flex !important;
+		flex-direction: row !important;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		font-weight: normal !important;
+	}
+
+	.checkbox-label input[type="checkbox"] {
+		margin: 0;
+		transform: scale(1.2);
+	}
+
+	.submit-btn {
+		background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+		color: white;
+		padding: 1rem 2rem;
+		border: none;
+		border-radius: 0.5rem;
+		font-size: 1.1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s;
+	}
+
+	.submit-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+	}
+
+	.faq-section {
+		background: var(--card-background);
+		padding: 3rem;
+		border-radius: 1rem;
+		border: 1px solid var(--border-color);
+	}
+
+	.faq-section h2 {
+		text-align: center;
+		margin-bottom: 2rem;
+		color: var(--text-color);
+	}
+
+	.faq-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 2rem;
+	}
+
+	.faq-item {
+		background: white;
+		padding: 1.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--border-color);
+	}
+
+	.faq-item h3 {
+		margin-bottom: 1rem;
+		color: var(--primary-color);
+	}
+
+	.faq-item p {
+		color: var(--secondary-color);
+		line-height: 1.6;
+	}
+
+	@media (max-width: 768px) {
+		.contact-grid {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+
+		.page-header h1 {
+			font-size: 2rem;
+		}
+
+		.contact-form-container {
+			padding: 1.5rem;
+		}
+
+		.faq-section {
+			padding: 2rem;
+		}
+
+		.social-icons {
+			flex-direction: column;
+		}
+	}
+</style>
+
+<script>
+	function handleContactForm(event) {
+		event.preventDefault();
+
+		// Get form data
+		const formData = new FormData(event.target);
+		const data = Object.fromEntries(formData);
+
+		// Simulate form submission
+		const submitBtn = event.target.querySelector('.submit-btn');
+		const originalText = submitBtn.textContent;
+
+		submitBtn.textContent = 'Sending...';
+		submitBtn.disabled = true;
+
+		setTimeout(() => {
+			alert('Thank you for your message! We\'ll get back to you within 24 hours.');
+			event.target.reset();
+			submitBtn.textContent = originalText;
+			submitBtn.disabled = false;
+		}, 2000);
+	}
+
+	// Make function globally available
+	window.handleContactForm = handleContactForm;
+</script>

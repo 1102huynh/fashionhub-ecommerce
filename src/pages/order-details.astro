@@ -1,0 +1,482 @@
+---
+import EcommerceLayout from '../layouts/EcommerceLayout.astro';
+---
+
+<EcommerceLayout title="Order Details - FashionHub" description="View your order details">
+  <div class="order-details-page">
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-separator">/</span>
+      <a href="/account">Account</a>
+      <span class="breadcrumb-separator">/</span>
+      <span>Order Details</span>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading order details...</p>
+    </div>
+
+    <!-- Order Content -->
+    <div id="order-content" style="display: none;">
+      <!-- Order Header -->
+      <div class="order-header">
+        <div>
+          <h1 id="order-number">Order #...</h1>
+          <p class="order-date" id="order-date"></p>
+        </div>
+        <div class="order-status-badge" id="order-status"></div>
+      </div>
+
+      <div class="order-layout">
+        <!-- Order Items -->
+        <div class="order-section">
+          <h2>Order Items</h2>
+          <div class="order-items" id="order-items"></div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="order-sidebar">
+          <!-- Shipping Address -->
+          <div class="info-card">
+            <h3>Shipping Address</h3>
+            <div id="shipping-address"></div>
+          </div>
+
+          <!-- Payment Info -->
+          <div class="info-card">
+            <h3>Payment Method</h3>
+            <div id="payment-info"></div>
+          </div>
+
+          <!-- Order Summary -->
+          <div class="info-card">
+            <h3>Order Summary</h3>
+            <div class="summary-lines">
+              <div class="summary-line">
+                <span>Subtotal:</span>
+                <span id="summary-subtotal">$0.00</span>
+              </div>
+              <div class="summary-line">
+                <span>Shipping:</span>
+                <span id="summary-shipping">$0.00</span>
+              </div>
+              <div class="summary-line">
+                <span>Tax:</span>
+                <span id="summary-tax">$0.00</span>
+              </div>
+              <div class="summary-line total">
+                <strong>Total:</strong>
+                <strong id="summary-total">$0.00</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tracking -->
+          <div class="info-card" id="tracking-card" style="display: none;">
+            <h3>Tracking Information</h3>
+            <div id="tracking-info"></div>
+            <button class="btn btn-outline btn-full" onclick="alert('Track package feature coming soon!')">
+              📦 Track Package
+            </button>
+          </div>
+
+          <!-- Actions -->
+          <div class="order-actions">
+            <button class="btn btn-outline btn-full" onclick="window.print()">
+              🖨️ Print Invoice
+            </button>
+            <a href="/contact" class="btn btn-outline btn-full">
+              💬 Contact Support
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" style="display: none;" class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h2>Order Not Found</h2>
+      <p>We couldn't find the order you're looking for.</p>
+      <a href="/account" class="btn btn-primary">Back to Orders</a>
+    </div>
+  </div>
+</EcommerceLayout>
+
+<style>
+  .order-details-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .loading-state {
+    text-align: center;
+    padding: 6rem 2rem;
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .order-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .order-date {
+    color: var(--secondary-color);
+  }
+
+  .order-status-badge {
+    padding: 0.75rem 1.5rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  .order-status-badge.pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .order-status-badge.processing {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .order-status-badge.shipped {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .order-status-badge.delivered {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .order-status-badge.cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .order-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 2rem;
+  }
+
+  .order-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .order-section h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+  }
+
+  .order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .order-item {
+    display: flex;
+    gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .order-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .item-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .item-info {
+    flex: 1;
+  }
+
+  .item-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .item-details {
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .item-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+
+  .order-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .info-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .info-card h3 {
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+  }
+
+  .info-card p {
+    margin: 0.25rem 0;
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+
+  .summary-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .summary-line.total {
+    padding-top: 0.75rem;
+    border-top: 2px solid var(--border-color);
+    margin-top: 0.75rem;
+    font-size: 1.125rem;
+  }
+
+  .order-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .btn-full {
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+  }
+
+  .error-state {
+    text-align: center;
+    padding: 6rem 2rem;
+  }
+
+  .error-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+  }
+
+  .error-state h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .error-state p {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+    font-size: 1.125rem;
+  }
+
+  @media (max-width: 968px) {
+    .order-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .order-header h1 {
+      font-size: 1.5rem;
+    }
+
+    .order-section {
+      padding: 1.5rem;
+    }
+
+    .item-image {
+      width: 80px;
+      height: 80px;
+    }
+  }
+</style>
+
+<script>
+  import { orderManager } from '../stores/orders';
+
+  async function loadOrderDetails() {
+    const loadingState = document.getElementById('loading-state');
+    const orderContent = document.getElementById('order-content');
+    const errorState = document.getElementById('error-state');
+
+    try {
+      // Get order ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('id');
+
+      if (!orderId) {
+        throw new Error('No order ID provided');
+      }
+
+      // Load order
+      const order = orderManager.getOrder(orderId);
+
+      if (!order) {
+        throw new Error('Order not found');
+      }
+
+      // Hide loading, show content
+      if (loadingState) loadingState.style.display = 'none';
+      if (orderContent) orderContent.style.display = 'block';
+
+      // Display order details
+      displayOrderDetails(order);
+
+    } catch (error) {
+      console.error('Error loading order:', error);
+      if (loadingState) loadingState.style.display = 'none';
+      if (errorState) errorState.style.display = 'block';
+    }
+  }
+
+  function displayOrderDetails(order: any) {
+    // Order number and date
+    const orderNumberEl = document.getElementById('order-number');
+    const orderDateEl = document.getElementById('order-date');
+    const orderStatusEl = document.getElementById('order-status');
+
+    if (orderNumberEl) orderNumberEl.textContent = `Order ${order.orderNumber}`;
+    if (orderDateEl) {
+      orderDateEl.textContent = `Placed on ${new Date(order.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })}`;
+    }
+    if (orderStatusEl) {
+      orderStatusEl.textContent = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+      orderStatusEl.className = `order-status-badge ${order.status}`;
+    }
+
+    // Order items
+    const itemsContainer = document.getElementById('order-items');
+    if (itemsContainer) {
+      itemsContainer.innerHTML = order.items.map((item: any) => {
+        const image = item.product.images.find((img: any) => img.isPrimary) || item.product.images[0];
+        const price = item.variant?.price || item.product.price;
+
+        return `
+          <div class="order-item">
+            <img src="${image.url}" alt="${item.product.name}" class="item-image">
+            <div class="item-info">
+              <div class="item-name">${item.product.name}</div>
+              <div class="item-details">
+                Size: ${item.variant?.size || 'N/A'} • 
+                Color: ${item.variant?.color || 'N/A'} • 
+                Qty: ${item.quantity}
+              </div>
+              <div class="item-price">$${(price * item.quantity).toFixed(2)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Shipping address
+    const shippingAddressEl = document.getElementById('shipping-address');
+    if (shippingAddressEl) {
+      const addr = order.shippingAddress;
+      shippingAddressEl.innerHTML = `
+        <p><strong>${addr.firstName} ${addr.lastName}</strong></p>
+        <p>${addr.address}</p>
+        <p>${addr.city}, ${addr.state} ${addr.zipCode}</p>
+        <p>${addr.country}</p>
+        <p style="margin-top: 0.5rem;">
+          <strong>Email:</strong> ${addr.email}<br>
+          <strong>Phone:</strong> ${addr.phone}
+        </p>
+      `;
+    }
+
+    // Payment info
+    const paymentInfoEl = document.getElementById('payment-info');
+    if (paymentInfoEl) {
+      const paymentMethod = order.paymentInfo.method === 'card' ? '💳 Credit Card' :
+                            order.paymentInfo.method === 'paypal' ? '🅿️ PayPal' :
+                            '🍎 Apple Pay';
+      paymentInfoEl.innerHTML = `<p>${paymentMethod}</p>`;
+    }
+
+    // Summary
+    document.getElementById('summary-subtotal')!.textContent = `$${order.subtotal.toFixed(2)}`;
+    document.getElementById('summary-shipping')!.textContent = `$${order.shippingCost.toFixed(2)}`;
+    document.getElementById('summary-tax')!.textContent = `$${order.tax.toFixed(2)}`;
+    document.getElementById('summary-total')!.textContent = `$${order.total.toFixed(2)}`;
+
+    // Tracking info
+    if (order.trackingNumber && (order.status === 'shipped' || order.status === 'delivered')) {
+      const trackingCard = document.getElementById('tracking-card');
+      const trackingInfo = document.getElementById('tracking-info');
+
+      if (trackingCard) trackingCard.style.display = 'block';
+      if (trackingInfo) {
+        trackingInfo.innerHTML = `
+          <p><strong>Tracking Number:</strong><br>${order.trackingNumber}</p>
+          <p style="margin-top: 0.5rem;"><strong>Estimated Delivery:</strong><br>
+            ${new Date(order.estimatedDelivery).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </p>
+        `;
+      }
+    }
+  }
+
+  // Load order on page load
+  loadOrderDetails();
+</script>
+

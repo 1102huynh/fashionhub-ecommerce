@@ -1,0 +1,19 @@
+{
+  "name": "astro-fashion-hub",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.1",
+    "astro": "^5.16.4",
+    "nanoid": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

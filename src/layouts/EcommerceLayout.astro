@@ -1,0 +1,770 @@
+---
+import ShoppingCart from '../components/ecommerce/ShoppingCartFixed.astro';
+import ToastNotification from '../components/ToastNotification.astro';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Fashion clothing store built with Astro and MCP" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <meta name="description" content={description}>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --background-color: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --card-background: #f8fafc;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --error-color: #dc2626;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            transition: transform var(--transition-base);
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.625rem 1rem;
+            border-radius: var(--radius-lg);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            position: relative;
+            transition: all var(--transition-base);
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transform: translateX(-50%);
+            transition: width var(--transition-base);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        .nav-links a:hover::before {
+            width: 80%;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-icon-btn {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 1.25rem;
+            transition: all 0.2s;
+            background: var(--card-background);
+        }
+
+        .nav-icon-btn:hover {
+            background: var(--border-color);
+            transform: scale(1.05);
+        }
+
+        .nav-icon-btn .badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--error-color);
+            color: white;
+            font-size: 0.625rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        main {
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Modern Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.0625rem;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #e2e8f0;
+            padding: 4rem 0 2rem;
+            margin-top: 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(99, 102, 241, 0.5) 50%,
+                transparent 100%);
+        }
+
+        footer::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h4 {
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .footer-section p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section ul li a {
+            color: #e2e8f0;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .footer-section ul li a:hover {
+            opacity: 1;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .newsletter-form input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .newsletter-form input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .newsletter-form .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .footer-bottom p {
+            margin: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        .card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb-separator {
+            color: var(--border-color);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+            border-radius: 0.5rem;
+        }
+
+        .hero-content {
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .category-nav {
+            background: var(--card-background);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0.5rem;
+        }
+
+        .category-list {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .category-link {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            color: var(--secondary-color);
+            transition: all 0.2s;
+        }
+
+        .category-link:hover,
+        .category-link.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-actions {
+                gap: 0.5rem;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="/" class="logo">FashionHub</a>
+                <ul class="nav-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/products">Products</a></li>
+                    <li><a href="/products?category=men">Men</a></li>
+                    <li><a href="/products?category=women">Women</a></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="/search" class="nav-icon-btn" title="Search">
+                        🔍
+                    </a>
+                    <a href="/wishlist" class="nav-icon-btn" title="Wishlist" id="wishlist-btn">
+                        <span class="icon">💝</span>
+                        <span class="badge" id="wishlist-count" style="display: none;">0</span>
+                    </a>
+                    <a href="/login" id="auth-link" class="btn btn-outline">Login</a>
+                    <ShoppingCart />
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <slot />
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>FashionHub</h4>
+                    <p>Your destination for premium fashion and style. Curated collections that define modern elegance.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook">📘</a>
+                        <a href="#" aria-label="Instagram">📸</a>
+                        <a href="#" aria-label="Twitter">🐦</a>
+                        <a href="#" aria-label="Pinterest">📌</a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="/products?category=women">Women's Collection</a></li>
+                        <li><a href="/products?category=men">Men's Collection</a></li>
+                        <li><a href="/products?filter=new">New Arrivals</a></li>
+                        <li><a href="/products?filter=sale">Sale</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Customer Service</h4>
+                    <ul>
+                        <li><a href="/contact">Contact Us</a></li>
+                        <li><a href="/shipping-returns">Shipping & Returns</a></li>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/checkout">Checkout</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Information</h4>
+                    <ul>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms & Conditions</a></li>
+                        <li><a href="/shipping-returns">Shipping Info</a></li>
+                        <li><a href="/contact">Customer Support</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section newsletter">
+                    <h4>Stay Updated</h4>
+                    <p>Subscribe to get special offers and updates</p>
+                    <form class="newsletter-form" onsubmit="handleNewsletterSignup(event)">
+                        <input type="email" placeholder="Your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                    <div class="payment-methods">
+                        <span>💳</span>
+                        <span>🅿️</span>
+                        <span>🍎</span>
+                        <span>💵</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 FashionHub. All rights reserved.</p>
+                <p>Made with ❤️ for fashion enthusiasts worldwide</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Add smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Newsletter signup handler
+        function handleNewsletterSignup(event) {
+            event.preventDefault();
+            const form = event.target;
+            const email = form.querySelector('input[type="email"]').value;
+
+            // Simulate signup
+            alert(`Thank you for subscribing! We'll send updates to ${email}`);
+            form.reset();
+        }
+
+        // Make function globally available
+        window.handleNewsletterSignup = handleNewsletterSignup;
+
+        // Update auth button based on login state
+        async function updateAuthButton() {
+            try {
+                const { authManager } = await import('../stores/auth.js');
+                const authLink = document.getElementById('auth-link');
+
+                if (authLink && authManager.isAuthenticated()) {
+                    const user = authManager.getCurrentUser();
+                    authLink.href = '/account';
+                    authLink.innerHTML = `<span>👤</span> ${user?.firstName || 'Account'}`;
+                }
+
+                // Listen for auth changes
+                window.addEventListener('auth-updated', () => {
+                    if (authManager.isAuthenticated()) {
+                        const user = authManager.getCurrentUser();
+                        if (authLink) {
+                            authLink.href = '/account';
+                            authLink.innerHTML = `<span>👤</span> ${user?.firstName || 'Account'}`;
+                        }
+                    } else {
+                        if (authLink) {
+                            authLink.href = '/login';
+                            authLink.textContent = 'Login';
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Auth module not loaded yet');
+            }
+        }
+
+        // Update wishlist count
+        async function updateWishlistCount() {
+            try {
+                const { wishlistManager } = await import('../stores/wishlist.js');
+                const count = wishlistManager.getWishlistCount();
+                const badge = document.getElementById('wishlist-count');
+
+                if (badge) {
+                    if (count > 0) {
+                        badge.textContent = count.toString();
+                        badge.style.display = 'block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+
+                // Listen for wishlist updates
+                window.addEventListener('wishlist-updated', () => {
+                    const newCount = wishlistManager.getWishlistCount();
+                    if (badge) {
+                        if (newCount > 0) {
+                            badge.textContent = newCount.toString();
+                            badge.style.display = 'block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Wishlist module not loaded yet');
+            }
+        }
+
+        // Update on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                updateAuthButton();
+                updateWishlistCount();
+            });
+        } else {
+            updateAuthButton();
+            updateWishlistCount();
+        }
+    </script>
+
+    <!-- Toast Notifications -->
+    <ToastNotification />
+</body>
+</html>

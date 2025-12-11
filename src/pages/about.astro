@@ -1,0 +1,160 @@
+---
+import EcommerceLayout from '../layouts/EcommerceLayout.astro';
+---
+
+<EcommerceLayout title="About FashionHub" description="Learn about our premium clothing store and commitment to quality fashion">
+	<div class="breadcrumb">
+		<a href="/">Home</a>
+		<span class="breadcrumb-separator">/</span>
+		<span>About</span>
+	</div>
+
+	<div class="about-page">
+		<div class="hero-section" style="padding: 2rem 0; margin-bottom: 3rem;">
+			<div class="hero-content">
+				<h1 class="hero-title" style="font-size: 2.5rem;">About FashionHub</h1>
+				<p class="hero-subtitle">Redefining fashion with AI-powered personalization</p>
+			</div>
+		</div>
+
+		<section style="margin-bottom: 3rem;">
+			<h2 style="font-size: 2rem; margin-bottom: 1rem;">Our Story</h2>
+			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+				<div>
+					<p style="margin-bottom: 1rem; line-height: 1.7;">
+						Founded in 2025, FashionHub represents the perfect fusion of timeless fashion and cutting-edge AI technology.
+						We believe that everyone deserves access to high-quality, stylish clothing that reflects their unique personality.
+					</p>
+					<p style="margin-bottom: 1rem; line-height: 1.7;">
+						Our journey began with a simple question: "What if shopping for clothes could be as personalized as your style?"
+						This led us to integrate Model Context Protocol (MCP) technology into our platform, creating an intelligent
+						shopping experience that learns from your preferences and helps you discover pieces you'll love.
+					</p>
+					<p style="line-height: 1.7;">
+						Today, we're proud to offer carefully curated collections from emerging and established brands, all powered by
+						AI recommendations that make finding your perfect outfit effortless.
+					</p>
+				</div>
+				<div style="text-align: center;">
+					<div style="font-size: 5rem; margin-bottom: 1rem;">👗</div>
+					<p style="color: var(--secondary-color); font-style: italic;">
+						"Fashion is not just about clothes, it's about expressing who you are."
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<section style="background: var(--card-background); padding: 3rem; border-radius: 0.5rem; margin-bottom: 3rem;">
+			<h2 style="font-size: 2rem; margin-bottom: 2rem; text-align: center;">Our Values</h2>
+			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+				<div class="value-card">
+					<div style="font-size: 3rem; margin-bottom: 1rem; text-align: center;">🌱</div>
+					<h3 style="margin-bottom: 1rem; text-align: center;">Sustainability</h3>
+					<p style="text-align: center; color: var(--secondary-color);">
+						We partner with brands committed to ethical manufacturing and sustainable materials,
+						ensuring our fashion choices don't compromise the future.
+					</p>
+				</div>
+				<div class="value-card">
+					<div style="font-size: 3rem; margin-bottom: 1rem; text-align: center;">⭐</div>
+					<h3 style="margin-bottom: 1rem; text-align: center;">Quality</h3>
+					<p style="text-align: center; color: var(--secondary-color);">
+						Every product in our collection is carefully selected for its craftsmanship,
+						durability, and timeless design that transcends seasonal trends.
+					</p>
+				</div>
+				<div class="value-card">
+					<div style="font-size: 3rem; margin-bottom: 1rem; text-align: center;">🤖</div>
+					<h3 style="margin-bottom: 1rem; text-align: center;">Innovation</h3>
+					<p style="text-align: center; color: var(--secondary-color);">
+						We leverage AI and machine learning to create personalized shopping experiences
+						that understand your style preferences and help you discover new favorites.
+					</p>
+				</div>
+				<div class="value-card">
+					<div style="font-size: 3rem; margin-bottom: 1rem; text-align: center;">❤️</div>
+					<h3 style="margin-bottom: 1rem; text-align: center;">Community</h3>
+					<p style="text-align: center; color: var(--secondary-color);">
+						Fashion is personal, but it's also shared. We build a community where style inspiration
+						flows freely and everyone feels welcome to express themselves.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<section style="margin-bottom: 3rem;">
+			<h2 style="font-size: 2rem; margin-bottom: 2rem; text-align: center;">AI-Powered Features</h2>
+			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+				<div class="card">
+					<h3 style="margin-bottom: 1rem;">Smart Recommendations</h3>
+					<p style="color: var(--secondary-color); margin-bottom: 1rem;">
+						Our MCP-powered recommendation engine learns from your browsing history, purchases,
+						and style preferences to suggest items you'll love.
+					</p>
+					<a href="/mcp-demo" style="color: var(--primary-color); text-decoration: none;">
+						Try AI Features →
+					</a>
+				</div>
+				<div class="card">
+					<h3 style="margin-bottom: 1rem;">Virtual Styling Assistant</h3>
+					<p style="color: var(--secondary-color); margin-bottom: 1rem;">
+						Get personalized styling advice and outfit suggestions based on your existing wardrobe
+						and upcoming events.
+					</p>
+					<a href="/mcp-demo" style="color: var(--primary-color); text-decoration: none;">
+						Chat with Stylist →
+					</a>
+				</div>
+				<div class="card">
+					<h3 style="margin-bottom: 1rem;">Trend Insights</h3>
+					<p style="color: var(--secondary-color); margin-bottom: 1rem;">
+						Stay ahead of fashion trends with AI-generated insights about emerging styles
+						and what's popular in your region.
+					</p>
+					<a href="/mcp-demo" style="color: var(--primary-color); text-decoration: none;">
+						View Trends →
+					</a>
+				</div>
+			</div>
+		</section>
+
+		<section style="background: linear-gradient(135deg, var(--primary-color), #1e40af); color: white; padding: 3rem; border-radius: 0.5rem; text-align: center;">
+			<h2 style="font-size: 2rem; margin-bottom: 1rem;">Join Our Fashion Revolution</h2>
+			<p style="margin-bottom: 2rem; font-size: 1.1rem; opacity: 0.9;">
+				Experience the future of fashion shopping with personalized AI recommendations and curated collections.
+			</p>
+			<div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+				<a href="/products" class="btn" style="background: white; color: var(--primary-color); padding: 0.75rem 2rem;">
+					Shop Now
+				</a>
+				<a href="/mcp-demo" class="btn btn-outline" style="border-color: white; color: white; padding: 0.75rem 2rem;">
+					Try AI Features
+				</a>
+			</div>
+		</section>
+	</div>
+</EcommerceLayout>
+
+<style>
+	.value-card {
+		background: white;
+		padding: 2rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--border-color);
+		transition: transform 0.2s;
+	}
+
+	.value-card:hover {
+		transform: translateY(-2px);
+	}
+
+	@media (max-width: 768px) {
+		.about-page div[style*="grid-template-columns: 1fr 1fr"] {
+			grid-template-columns: 1fr !important;
+		}
+
+		.hero-title {
+			font-size: 2rem !important;
+		}
+	}
+</style>

@@ -1,0 +1,687 @@
+---
+import EcommerceLayout from '../../layouts/EcommerceLayout.astro';
+
+export async function getStaticPaths() {
+  // Import inside function to ensure it runs at build time
+  const { mockProducts } = await import('../../utils/mock-data.js');
+
+  return mockProducts.map((product) => ({
+    params: { id: product.id },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props;
+
+if (!product) {
+  return Astro.redirect('/products');
+}
+
+const primaryImage = product.images.find((img: any) => img.isPrimary) || product.images[0];
+const displayPrice = product.salePrice || product.price;
+const hasDiscount = !!product.salePrice;
+const discountPercent = hasDiscount && product.salePrice ? Math.round(((product.price - product.salePrice) / product.price) * 100) : 0;
+---
+
+<EcommerceLayout title={`${product.name} - FashionHub`} description={product.description}>
+	<div class="breadcrumb">
+		<a href="/">Home</a>
+		<span class="breadcrumb-separator">/</span>
+		<a href="/products">Products</a>
+		<span class="breadcrumb-separator">/</span>
+		<a href={`/products?category=${product.category.slug}`}>{product.category.name}</a>
+		<span class="breadcrumb-separator">/</span>
+		<span>{product.name}</span>
+	</div>
+
+	<div class="product-detail">
+		<div class="product-gallery">
+			<div class="main-image">
+				<img id="main-product-image" src={primaryImage?.url || '/images/placeholder-product.jpg'} alt={primaryImage?.alt || product.name} />
+				{hasDiscount && (
+					<span class="discount-badge">
+						{discountPercent}% OFF
+					</span>
+				)}
+			</div>
+
+			{product.images.length > 1 && (
+				<div class="image-thumbnails">
+					{product.images.map((image: any) => (
+						<button
+							class={`thumbnail ${image.isPrimary ? 'active' : ''}`}
+							onclick={`switchImage('${image.url}', '${image.alt}')`}
+						>
+							<img src={image.url} alt={image.alt} />
+						</button>
+					))}
+				</div>
+			)}
+		</div>
+
+		<div class="product-info">
+			<div class="product-header">
+				<h1 class="product-title">{product.name}</h1>
+				<p class="product-brand">by {product.brand}</p>
+
+				<div class="product-rating">
+					{Array.from({ length: 5 }, (_, i) => (
+						<span class={`star ${i < Math.floor(product.rating || 0) ? 'filled' : ''}`}>★</span>
+					))}
+					<span class="rating-text">({product.rating}) • {product.reviewCount} reviews</span>
+				</div>
+			</div>
+
+			<div class="product-price">
+				<span class="current-price">${displayPrice.toFixed(2)}</span>
+				{hasDiscount && (
+					<span class="original-price">${product.price.toFixed(2)}</span>
+				)}
+			</div>
+
+			<div class="product-description">
+				<p>{product.description}</p>
+			</div>
+
+			<div class="product-options">
+				<div class="option-group">
+					<label class="option-label">Size</label>
+					<div class="size-options">
+						{product.sizes.map(size => (
+							<button class="size-option" data-size={size.value}>
+								{size.name}
+							</button>
+						))}
+					</div>
+				</div>
+
+				<div class="option-group">
+					<label class="option-label">Color</label>
+					<div class="color-options">
+						{product.colors.map(color => (
+							<button
+								class="color-option"
+								data-color={color.name}
+								style={`background-color: ${color.value}`}
+								title={color.name}
+							>
+								<span class="sr-only">{color.name}</span>
+							</button>
+						))}
+					</div>
+				</div>
+
+				<div class="option-group">
+					<label class="option-label" for="quantity">Quantity</label>
+					<div class="quantity-selector">
+						<button id="qty-minus" class="qty-btn">−</button>
+						<input id="quantity" type="number" value="1" min="1" max="10" />
+						<button id="qty-plus" class="qty-btn">+</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="product-actions">
+				<button id="add-to-cart" class="btn btn-primary add-to-cart-btn">
+					Add to Cart
+				</button>
+				<button class="btn btn-outline wishlist-btn">
+					♡ Add to Wishlist
+				</button>
+			</div>
+
+			<div class="product-details">
+				<details class="detail-section">
+					<summary>Product Details</summary>
+					<div class="detail-content">
+						{product.material && <p><strong>Material:</strong> {product.material}</p>}
+						{product.careInstructions && <p><strong>Care Instructions:</strong> {product.careInstructions}</p>}
+						{product.tags && product.tags.length > 0 && (
+							<div class="product-tags">
+								<strong>Tags:</strong>
+								{product.tags.map(tag => (
+									<span class="tag">{tag}</span>
+								))}
+							</div>
+						)}
+					</div>
+				</details>
+
+				<details class="detail-section">
+					<summary>Shipping & Returns</summary>
+					<div class="detail-content">
+						<p><strong>Free shipping</strong> on orders over $50</p>
+						<p><strong>Standard delivery:</strong> 3-5 business days</p>
+						<p><strong>Express delivery:</strong> 1-2 business days</p>
+						<p><strong>Returns:</strong> 30-day hassle-free returns</p>
+					</div>
+				</details>
+
+				<details class="detail-section">
+					<summary>Size Guide</summary>
+					<div class="detail-content">
+						<p>Please refer to our size chart to find your perfect fit.</p>
+						<a href="/size-guide" style="color: var(--primary-color);">View Size Guide →</a>
+					</div>
+				</details>
+			</div>
+		</div>
+	</div>
+</EcommerceLayout>
+
+<style>
+	.product-detail {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 3rem;
+		margin: 2rem 0;
+	}
+
+	.product-gallery {
+		position: sticky;
+		top: 120px;
+		height: fit-content;
+	}
+
+	.main-image {
+		position: relative;
+		aspect-ratio: 1;
+		margin-bottom: 1rem;
+		border-radius: 0.5rem;
+		overflow: hidden;
+	}
+
+	.main-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.discount-badge {
+		position: absolute;
+		top: 1rem;
+		left: 1rem;
+		background: #dc2626;
+		color: white;
+		padding: 0.5rem 1rem;
+		border-radius: 0.25rem;
+		font-weight: bold;
+		font-size: 0.875rem;
+	}
+
+	.image-thumbnails {
+		display: flex;
+		gap: 0.5rem;
+		overflow-x: auto;
+		padding: 0.5rem 0;
+	}
+
+	.thumbnail {
+		flex-shrink: 0;
+		width: 80px;
+		height: 80px;
+		border: 2px solid transparent;
+		border-radius: 0.25rem;
+		overflow: hidden;
+		cursor: pointer;
+		background: none;
+		padding: 0;
+		transition: border-color 0.2s;
+	}
+
+	.thumbnail.active,
+	.thumbnail:hover {
+		border-color: var(--primary-color);
+	}
+
+	.thumbnail img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.product-header {
+		margin-bottom: 1.5rem;
+	}
+
+	.product-title {
+		font-size: 2rem;
+		margin-bottom: 0.5rem;
+		color: var(--text-color);
+	}
+
+	.product-brand {
+		color: var(--secondary-color);
+		font-size: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.product-rating {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.star {
+		color: #fbbf24;
+		font-size: 1rem;
+	}
+
+	.star:not(.filled) {
+		color: #e5e7eb;
+	}
+
+	.rating-text {
+		color: var(--secondary-color);
+		font-size: 0.875rem;
+	}
+
+	.product-price {
+		margin-bottom: 1.5rem;
+		padding-bottom: 1.5rem;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.current-price {
+		font-size: 2rem;
+		font-weight: 700;
+		color: var(--primary-color);
+	}
+
+	.original-price {
+		font-size: 1.25rem;
+		color: var(--secondary-color);
+		text-decoration: line-through;
+		margin-left: 1rem;
+	}
+
+	.product-description {
+		margin-bottom: 2rem;
+		line-height: 1.7;
+		color: var(--text-color);
+	}
+
+	.product-options {
+		margin-bottom: 2rem;
+	}
+
+	.option-group {
+		margin-bottom: 1.5rem;
+	}
+
+	.option-label {
+		display: block;
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+		color: var(--text-color);
+	}
+
+	.size-options {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.size-option {
+		padding: 0.5rem 1rem;
+		border: 2px solid var(--border-color);
+		background: white;
+		border-radius: 0.25rem;
+		cursor: pointer;
+		transition: all 0.2s;
+		font-weight: 500;
+	}
+
+	.size-option:hover,
+	.size-option.selected {
+		border-color: var(--primary-color);
+		background: var(--primary-color);
+		color: white;
+	}
+
+	.color-options {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.color-option {
+		width: 2.5rem;
+		height: 2.5rem;
+		border: 3px solid transparent;
+		border-radius: 50%;
+		cursor: pointer;
+		transition: all 0.2s;
+		position: relative;
+	}
+
+	.color-option:hover,
+	.color-option.selected {
+		border-color: var(--primary-color);
+		box-shadow: 0 0 0 2px white, 0 0 0 5px var(--primary-color);
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	.quantity-selector {
+		display: flex;
+		align-items: center;
+		width: fit-content;
+		border: 2px solid var(--border-color);
+		border-radius: 0.25rem;
+		overflow: hidden;
+	}
+
+	.qty-btn {
+		padding: 0.5rem 1rem;
+		border: none;
+		background: var(--card-background);
+		cursor: pointer;
+		font-size: 1.25rem;
+		transition: background-color 0.2s;
+	}
+
+	.qty-btn:hover {
+		background: var(--border-color);
+	}
+
+	#quantity {
+		border: none;
+		padding: 0.5rem;
+		text-align: center;
+		width: 4rem;
+		background: white;
+	}
+
+	.product-actions {
+		display: flex;
+		gap: 1rem;
+		margin-bottom: 2rem;
+	}
+
+	.add-to-cart-btn {
+		flex: 1;
+		padding: 1rem 2rem;
+		font-size: 1rem;
+		font-weight: 600;
+	}
+
+	.wishlist-btn {
+		padding: 1rem 1.5rem;
+		font-size: 1rem;
+		transition: all 0.2s;
+	}
+
+	.wishlist-btn.active {
+		background: #fee2e2;
+		border-color: #ef4444;
+		color: #dc2626;
+	}
+
+	.wishlist-btn.active:hover {
+		background: #fecaca;
+	}
+
+	.product-details {
+		border-top: 1px solid var(--border-color);
+		padding-top: 2rem;
+	}
+
+	.detail-section {
+		margin-bottom: 1rem;
+		border: 1px solid var(--border-color);
+		border-radius: 0.5rem;
+		overflow: hidden;
+	}
+
+	.detail-section summary {
+		padding: 1rem;
+		background: var(--card-background);
+		cursor: pointer;
+		font-weight: 600;
+		transition: background-color 0.2s;
+	}
+
+	.detail-section summary:hover {
+		background: var(--border-color);
+	}
+
+	.detail-content {
+		padding: 1rem;
+		line-height: 1.6;
+	}
+
+	.product-tags {
+		margin-top: 0.5rem;
+	}
+
+	.tag {
+		display: inline-block;
+		background: var(--card-background);
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.75rem;
+		margin: 0.25rem 0.25rem 0 0;
+		color: var(--secondary-color);
+	}
+
+	@media (max-width: 768px) {
+		.product-detail {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+
+		.product-gallery {
+			position: static;
+		}
+
+		.product-title {
+			font-size: 1.5rem;
+		}
+
+		.current-price {
+			font-size: 1.5rem;
+		}
+
+		.product-actions {
+			flex-direction: column;
+		}
+	}
+</style>
+
+<script>
+	// Extend window interface
+	declare global {
+		interface Window {
+			switchImage?: (url: string, alt: string) => void;
+		}
+	}
+
+	// Product detail page functionality
+	function switchImage(url: string, alt: string) {
+		const mainImage = document.getElementById('main-product-image') as HTMLImageElement;
+		if (mainImage) {
+			mainImage.src = url;
+			mainImage.alt = alt;
+		}
+
+		// Update active thumbnail
+		document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+		const currentTarget = (event?.target as HTMLElement)?.closest('.thumbnail');
+		if (currentTarget) {
+			currentTarget.classList.add('active');
+		}
+	}
+
+	// Size and color selection
+	document.querySelectorAll('.size-option').forEach(button => {
+		button.addEventListener('click', () => {
+			document.querySelectorAll('.size-option').forEach(btn => btn.classList.remove('selected'));
+			button.classList.add('selected');
+		});
+	});
+
+	document.querySelectorAll('.color-option').forEach(button => {
+		button.addEventListener('click', () => {
+			document.querySelectorAll('.color-option').forEach(btn => btn.classList.remove('selected'));
+			button.classList.add('selected');
+		});
+	});
+
+	// Quantity controls
+	document.getElementById('qty-minus')?.addEventListener('click', () => {
+		const qtyInput = document.getElementById('quantity') as HTMLInputElement;
+		if (qtyInput && parseInt(qtyInput.value) > 1) {
+			qtyInput.value = (parseInt(qtyInput.value) - 1).toString();
+		}
+	});
+
+	document.getElementById('qty-plus')?.addEventListener('click', () => {
+		const qtyInput = document.getElementById('quantity') as HTMLInputElement;
+		if (qtyInput && parseInt(qtyInput.value) < 10) {
+			qtyInput.value = (parseInt(qtyInput.value) + 1).toString();
+		}
+	});
+
+	// Add to cart functionality
+	document.getElementById('add-to-cart')?.addEventListener('click', async () => {
+		const selectedSize = document.querySelector('.size-option.selected');
+		const selectedColor = document.querySelector('.color-option.selected');
+		const quantityInput = document.getElementById('quantity') as HTMLInputElement;
+		const quantity = parseInt(quantityInput?.value || '1');
+
+		if (!selectedSize) {
+			alert('Please select a size');
+			return;
+		}
+
+		if (!selectedColor) {
+			alert('Please select a color');
+			return;
+		}
+
+		// In a real app, you'd make an API call here
+		// For now, we'll simulate adding to cart
+		const productId = window.location.pathname.split('/').pop();
+
+		if (!productId) {
+			alert('Invalid product');
+			return;
+		}
+
+		// Import cart manager dynamically
+		try {
+			const { cartManager } = await import('../../stores/cart.js');
+
+			// Find matching variant (simplified - in real app you'd match exactly)
+			const variantId = 'var-1'; // This should be dynamically determined
+
+			cartManager.addItem(productId, variantId, quantity);
+
+			// Dispatch cart update event
+			window.dispatchEvent(new CustomEvent('cart-updated'));
+
+			// Show success message
+			const button = document.getElementById('add-to-cart');
+			if (button) {
+				const originalText = button.textContent;
+				button.textContent = 'Added to Cart!';
+				button.style.background = 'var(--success-color)';
+
+				setTimeout(() => {
+					button.textContent = originalText;
+					button.style.background = '';
+				}, 2000);
+			}
+
+		} catch (error) {
+			console.error('Error adding to cart:', error);
+			alert('Error adding item to cart. Please try again.');
+		}
+	});
+
+	// Wishlist functionality
+	let isInWishlist = false;
+
+	async function initWishlist() {
+		try {
+			const { wishlistManager } = await import('../../stores/wishlist.js');
+			const { mockProducts } = await import('../../utils/mock-data.js');
+
+			const productId = window.location.pathname.split('/').pop();
+			if (!productId) return;
+
+			const product = mockProducts.find(p => p.id === productId);
+			if (!product) return;
+
+			// Check if in wishlist
+			isInWishlist = wishlistManager.isInWishlist(productId);
+			updateWishlistButton();
+
+			// Handle wishlist button click
+			const wishlistBtn = document.querySelector('.wishlist-btn');
+			wishlistBtn?.addEventListener('click', () => {
+				const result = wishlistManager.toggleWishlist(product);
+				isInWishlist = result.added;
+				updateWishlistButton();
+
+				// Show toast
+				if (result.added) {
+					window.showToast('Added to wishlist', { type: 'success', title: product.name });
+				} else {
+					window.showToast('Removed from wishlist', { type: 'info' });
+				}
+			});
+
+		} catch (error) {
+			console.error('Error initializing wishlist:', error);
+		}
+	}
+
+	function updateWishlistButton() {
+		const wishlistBtn = document.querySelector('.wishlist-btn');
+		if (wishlistBtn) {
+			if (isInWishlist) {
+				wishlistBtn.innerHTML = '♥ In Wishlist';
+				wishlistBtn.classList.add('active');
+			} else {
+				wishlistBtn.innerHTML = '♡ Add to Wishlist';
+				wishlistBtn.classList.remove('active');
+			}
+		}
+	}
+
+	// Recently viewed functionality
+	async function addToRecentlyViewed() {
+		try {
+			const { recentlyViewedManager } = await import('../../stores/recentlyViewed.js');
+			const { mockProducts } = await import('../../utils/mock-data.js');
+
+			const productId = window.location.pathname.split('/').pop();
+			if (!productId) return;
+
+			const product = mockProducts.find(p => p.id === productId);
+			if (product) {
+				recentlyViewedManager.addToRecentlyViewed(product);
+			}
+		} catch (error) {
+			console.error('Error adding to recently viewed:', error);
+		}
+	}
+
+	// Initialize
+	initWishlist();
+	addToRecentlyViewed();
+
+	// Make switchImage available globally
+	window.switchImage = switchImage;
+</script>

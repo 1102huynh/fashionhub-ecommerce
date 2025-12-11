@@ -1,0 +1,267 @@
+---
+import EcommerceLayout from '../layouts/EcommerceLayout.astro';
+---
+
+<EcommerceLayout title="Order Confirmation - FashionHub" description="Thank you for your order!">
+	<div class="confirmation-container">
+		<div class="confirmation-card">
+			<div class="success-icon">✓</div>
+			<h1>Order Confirmed!</h1>
+			<p class="confirmation-message">
+				Thank you for your purchase. Your order has been successfully placed.
+			</p>
+
+			<div class="order-info">
+				<div class="info-item">
+					<span class="info-label">Order Number:</span>
+					<span class="info-value" id="order-number">Loading...</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Order Date:</span>
+					<span class="info-value" id="order-date"></span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Estimated Delivery:</span>
+					<span class="info-value" id="delivery-date"></span>
+				</div>
+			</div>
+
+			<div class="confirmation-actions">
+				<a href="/products" class="btn btn-primary">Continue Shopping</a>
+				<button class="btn btn-outline" onclick="window.print()">Print Receipt</button>
+			</div>
+
+			<div class="next-steps">
+				<h3>What's Next?</h3>
+				<div class="steps-grid">
+					<div class="step-card">
+						<div class="step-icon">📧</div>
+						<h4>Confirmation Email</h4>
+						<p>Check your inbox for order details and tracking information</p>
+					</div>
+					<div class="step-card">
+						<div class="step-icon">📦</div>
+						<h4>Order Processing</h4>
+						<p>We're preparing your items for shipment</p>
+					</div>
+					<div class="step-card">
+						<div class="step-icon">🚚</div>
+						<h4>Shipment Tracking</h4>
+						<p>Track your order status in your account</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="help-section">
+				<p><strong>Need Help?</strong></p>
+				<p>Contact our customer service at <a href="mailto:support@fashionhub.com">support@fashionhub.com</a> or call <a href="tel:+15551234567">+1 (555) 123-4567</a></p>
+			</div>
+		</div>
+	</div>
+</EcommerceLayout>
+
+<style>
+	.confirmation-container {
+		max-width: 800px;
+		margin: 4rem auto;
+		padding: 0 1rem;
+	}
+
+	.confirmation-card {
+		background: white;
+		padding: 3rem;
+		border-radius: 1.5rem;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+		text-align: center;
+	}
+
+	.success-icon {
+		width: 100px;
+		height: 100px;
+		background: linear-gradient(135deg, #10b981, #059669);
+		color: white;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 4rem;
+		margin: 0 auto 2rem;
+		animation: successPop 0.5s ease;
+	}
+
+	@keyframes successPop {
+		0% { transform: scale(0); }
+		50% { transform: scale(1.1); }
+		100% { transform: scale(1); }
+	}
+
+	.confirmation-card h1 {
+		font-size: 2.5rem;
+		margin-bottom: 1rem;
+		color: var(--text-color);
+	}
+
+	.confirmation-message {
+		font-size: 1.1rem;
+		color: var(--secondary-color);
+		margin-bottom: 2rem;
+	}
+
+	.order-info {
+		background: var(--card-background);
+		padding: 2rem;
+		border-radius: 1rem;
+		margin-bottom: 2rem;
+		border: 1px solid var(--border-color);
+	}
+
+	.info-item {
+		display: flex;
+		justify-content: space-between;
+		padding: 1rem 0;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.info-item:last-child {
+		border-bottom: none;
+	}
+
+	.info-label {
+		font-weight: 600;
+		color: var(--text-color);
+	}
+
+	.info-value {
+		color: var(--secondary-color);
+	}
+
+	.confirmation-actions {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		margin-bottom: 3rem;
+		flex-wrap: wrap;
+	}
+
+	.confirmation-actions .btn {
+		padding: 1rem 2rem;
+	}
+
+	.next-steps {
+		margin-bottom: 3rem;
+		text-align: left;
+	}
+
+	.next-steps h3 {
+		text-align: center;
+		margin-bottom: 2rem;
+		font-size: 1.5rem;
+	}
+
+	.steps-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.step-card {
+		padding: 1.5rem;
+		background: var(--card-background);
+		border-radius: 1rem;
+		border: 1px solid var(--border-color);
+		text-align: center;
+	}
+
+	.step-icon {
+		font-size: 2.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.step-card h4 {
+		margin-bottom: 0.5rem;
+		color: var(--text-color);
+	}
+
+	.step-card p {
+		font-size: 0.875rem;
+		color: var(--secondary-color);
+		line-height: 1.5;
+	}
+
+	.help-section {
+		background: rgba(37, 99, 235, 0.05);
+		padding: 1.5rem;
+		border-radius: 1rem;
+		border: 1px solid rgba(37, 99, 235, 0.1);
+	}
+
+	.help-section p {
+		margin-bottom: 0.5rem;
+	}
+
+	.help-section a {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 600;
+	}
+
+	.help-section a:hover {
+		text-decoration: underline;
+	}
+
+	@media (max-width: 768px) {
+		.confirmation-card {
+			padding: 2rem 1.5rem;
+		}
+
+		.confirmation-card h1 {
+			font-size: 2rem;
+		}
+
+		.confirmation-actions {
+			flex-direction: column;
+		}
+
+		.confirmation-actions .btn {
+			width: 100%;
+		}
+
+		.steps-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
+
+<script>
+	// Get order ID from URL
+	const urlParams = new URLSearchParams(window.location.search);
+	const orderId = urlParams.get('id') || 'ORD-' + Date.now();
+
+	// Display order information
+	const orderNumberEl = document.getElementById('order-number');
+	if (orderNumberEl) {
+		orderNumberEl.textContent = orderId;
+	}
+
+	const orderDateEl = document.getElementById('order-date');
+	if (orderDateEl) {
+		const today = new Date();
+		orderDateEl.textContent = today.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		});
+	}
+
+	const deliveryDateEl = document.getElementById('delivery-date');
+	if (deliveryDateEl) {
+		const deliveryDate = new Date();
+		deliveryDate.setDate(deliveryDate.getDate() + 7);
+		deliveryDateEl.textContent = deliveryDate.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		});
+	}
+</script>
+

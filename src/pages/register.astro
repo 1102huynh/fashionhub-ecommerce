@@ -1,0 +1,433 @@
+---
+import EcommerceLayout from '../layouts/EcommerceLayout.astro';
+---
+
+<EcommerceLayout title="Register - FashionHub" description="Create your FashionHub account">
+	<div class="auth-container">
+		<div class="auth-card">
+			<h1>Create Account</h1>
+			<p class="auth-subtitle">Join FashionHub today</p>
+
+			<form id="register-form" class="auth-form">
+				<div class="form-row">
+					<div class="form-group">
+						<label for="firstName">First Name</label>
+						<input
+							type="text"
+							id="firstName"
+							name="firstName"
+							placeholder="John"
+							required
+						>
+					</div>
+					<div class="form-group">
+						<label for="lastName">Last Name</label>
+						<input
+							type="text"
+							id="lastName"
+							name="lastName"
+							placeholder="Doe"
+							required
+						>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="email">Email Address</label>
+					<input
+						type="email"
+						id="email"
+						name="email"
+						placeholder="your@email.com"
+						required
+					>
+				</div>
+
+				<div class="form-group">
+					<label for="phone">Phone Number (Optional)</label>
+					<input
+						type="tel"
+						id="phone"
+						name="phone"
+						placeholder="+1 (555) 123-4567"
+					>
+				</div>
+
+				<div class="form-group">
+					<label for="password">Password</label>
+					<input
+						type="password"
+						id="password"
+						name="password"
+						placeholder="Minimum 6 characters"
+						required
+						minlength="6"
+					>
+				</div>
+
+				<div class="form-group">
+					<label for="confirmPassword">Confirm Password</label>
+					<input
+						type="password"
+						id="confirmPassword"
+						name="confirmPassword"
+						placeholder="Re-enter password"
+						required
+					>
+				</div>
+
+				<div class="form-group">
+					<label class="checkbox-label">
+						<input type="checkbox" name="terms" id="terms" required>
+						I agree to the <a href="/terms" class="link" target="_blank">Terms & Conditions</a> and <a href="/privacy" class="link" target="_blank">Privacy Policy</a>
+					</label>
+				</div>
+
+				<div class="form-group">
+					<label class="checkbox-label">
+						<input type="checkbox" name="newsletter" id="newsletter">
+						Send me exclusive offers and updates
+					</label>
+				</div>
+
+				<div id="error-message" class="error-message"></div>
+
+				<button type="submit" class="btn btn-primary btn-full" id="register-btn">
+					Create Account
+				</button>
+			</form>
+
+			<div class="auth-footer">
+				Already have an account? <a href="/login" class="link">Sign in</a>
+			</div>
+		</div>
+
+		<div class="auth-benefits">
+			<h3>Member Benefits</h3>
+			<div class="benefit-list">
+				<div class="benefit-item">
+					<span class="benefit-icon">🎁</span>
+					<div>
+						<h4>Welcome Bonus</h4>
+						<p>Get 10% off your first order</p>
+					</div>
+				</div>
+				<div class="benefit-item">
+					<span class="benefit-icon">⚡</span>
+					<div>
+						<h4>Fast Checkout</h4>
+						<p>Save your info for quicker purchases</p>
+					</div>
+				</div>
+				<div class="benefit-item">
+					<span class="benefit-icon">📦</span>
+					<div>
+						<h4>Order Tracking</h4>
+						<p>Track all your orders in one place</p>
+					</div>
+				</div>
+				<div class="benefit-item">
+					<span class="benefit-icon">💝</span>
+					<div>
+						<h4>Wishlist</h4>
+						<p>Save items for later</p>
+					</div>
+				</div>
+				<div class="benefit-item">
+					<span class="benefit-icon">🔔</span>
+					<div>
+						<h4>Exclusive Deals</h4>
+						<p>Early access to sales & promotions</p>
+					</div>
+				</div>
+				<div class="benefit-item">
+					<span class="benefit-icon">⭐</span>
+					<div>
+						<h4>Rewards Program</h4>
+						<p>Earn points with every purchase</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</EcommerceLayout>
+
+<style>
+	.auth-container {
+		max-width: 1200px;
+		margin: 3rem auto;
+		padding: 0 1rem;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 4rem;
+		align-items: start;
+	}
+
+	.auth-card {
+		background: white;
+		padding: 3rem;
+		border-radius: 1.5rem;
+		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--border-color);
+	}
+
+	.auth-card h1 {
+		font-size: 2rem;
+		margin-bottom: 0.5rem;
+		color: var(--text-color);
+		text-align: center;
+	}
+
+	.auth-subtitle {
+		text-align: center;
+		color: var(--secondary-color);
+		margin-bottom: 2rem;
+	}
+
+	.auth-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.form-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.form-group label {
+		margin-bottom: 0.5rem;
+		font-weight: 600;
+		color: var(--text-color);
+	}
+
+	.form-group input {
+		padding: 0.875rem;
+		border: 2px solid var(--border-color);
+		border-radius: 0.5rem;
+		font-size: 1rem;
+		transition: all 0.2s;
+	}
+
+	.form-group input:focus {
+		outline: none;
+		border-color: var(--primary-color);
+		box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: start;
+		gap: 0.75rem;
+		cursor: pointer;
+		font-weight: normal;
+		line-height: 1.6;
+	}
+
+	.checkbox-label input {
+		margin-top: 0.25rem;
+		transform: scale(1.2);
+		flex-shrink: 0;
+	}
+
+	.link {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 600;
+	}
+
+	.link:hover {
+		text-decoration: underline;
+	}
+
+	.error-message {
+		padding: 0.875rem;
+		background: #fee;
+		border: 1px solid #fcc;
+		border-radius: 0.5rem;
+		color: #c00;
+		font-size: 0.875rem;
+		display: none;
+	}
+
+	.error-message.show {
+		display: block;
+	}
+
+	.btn-full {
+		width: 100%;
+		padding: 1rem;
+		font-size: 1.1rem;
+		font-weight: 600;
+	}
+
+	.auth-footer {
+		text-align: center;
+		margin-top: 2rem;
+		padding-top: 2rem;
+		border-top: 1px solid var(--border-color);
+		color: var(--secondary-color);
+	}
+
+	.auth-benefits {
+		background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(37, 99, 235, 0.1));
+		padding: 3rem;
+		border-radius: 1.5rem;
+		border: 1px solid rgba(37, 99, 235, 0.2);
+	}
+
+	.auth-benefits h3 {
+		font-size: 1.5rem;
+		margin-bottom: 2rem;
+		color: var(--text-color);
+	}
+
+	.benefit-list {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+
+	.benefit-item {
+		display: flex;
+		gap: 1rem;
+		align-items: start;
+	}
+
+	.benefit-icon {
+		font-size: 2rem;
+		flex-shrink: 0;
+	}
+
+	.benefit-item h4 {
+		margin-bottom: 0.25rem;
+		color: var(--text-color);
+		font-size: 1.125rem;
+	}
+
+	.benefit-item p {
+		color: var(--secondary-color);
+		font-size: 0.875rem;
+	}
+
+	@media (max-width: 968px) {
+		.auth-container {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+
+		.auth-benefits {
+			order: -1;
+			padding: 2rem;
+		}
+
+		.benefit-list {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 1.5rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.auth-card {
+			padding: 2rem 1.5rem;
+		}
+
+		.form-row {
+			grid-template-columns: 1fr;
+		}
+
+		.benefit-list {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
+
+<script>
+	import { authManager } from '../stores/auth';
+
+	const registerForm = document.getElementById('register-form') as HTMLFormElement;
+	const errorMessage = document.getElementById('error-message') as HTMLElement;
+	const registerBtn = document.getElementById('register-btn') as HTMLButtonElement;
+
+	if (registerForm) {
+		registerForm.addEventListener('submit', async (e) => {
+			e.preventDefault();
+
+			// Get form data
+			const formData = new FormData(registerForm);
+			const data = {
+				firstName: formData.get('firstName') as string,
+				lastName: formData.get('lastName') as string,
+				email: formData.get('email') as string,
+				phone: formData.get('phone') as string,
+				password: formData.get('password') as string,
+				confirmPassword: formData.get('confirmPassword') as string,
+				terms: formData.get('terms') as string
+			};
+
+			// Clear previous errors
+			errorMessage.textContent = '';
+			errorMessage.classList.remove('show');
+
+			// Validate passwords match
+			if (data.password !== data.confirmPassword) {
+				errorMessage.textContent = 'Passwords do not match';
+				errorMessage.classList.add('show');
+				return;
+			}
+
+			// Check terms agreement
+			if (!data.terms) {
+				errorMessage.textContent = 'You must agree to the Terms & Conditions';
+				errorMessage.classList.add('show');
+				return;
+			}
+
+			// Disable button
+			const originalText = registerBtn.textContent;
+			registerBtn.textContent = 'Creating account...';
+			registerBtn.disabled = true;
+
+			try {
+				// Attempt registration
+				const result = await authManager.register({
+					firstName: data.firstName,
+					lastName: data.lastName,
+					email: data.email,
+					phone: data.phone,
+					password: data.password
+				});
+
+				if (result.success) {
+					// Success - redirect to account page
+					window.location.href = '/account?welcome=true';
+				} else {
+					// Show error
+					errorMessage.textContent = result.error || 'Registration failed. Please try again.';
+					errorMessage.classList.add('show');
+					registerBtn.textContent = originalText;
+					registerBtn.disabled = false;
+				}
+			} catch (error) {
+				console.error('Registration error:', error);
+				errorMessage.textContent = 'An unexpected error occurred. Please try again.';
+				errorMessage.classList.add('show');
+				registerBtn.textContent = originalText;
+				registerBtn.disabled = false;
+			}
+		});
+	}
+
+	// Check if already logged in
+	if (authManager.isAuthenticated()) {
+		window.location.href = '/account';
+	}
+</script>
+
