@@ -13,7 +13,7 @@ const hasDiscount = !!product.salePrice;
 const discountPercent = hasDiscount && product.salePrice ? Math.round(((product.price - product.salePrice) / product.price) * 100) : 0;
 ---
 
-<div class="product-card">
+<div class="product-card" data-product-id={product.id}>
   <a href={`/products/${product.id}`} class="product-link">
     <div class="product-image">
       <img src={primaryImage?.url || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop'} alt={primaryImage?.alt || product.name} loading="lazy" />
