@@ -660,102 +660,7 @@ import EcommerceLayout from '../layouts/EcommerceLayout.astro';
 	import { authManager } from '../stores/auth';
 	import { orderManager } from '../stores/orders';
 
-	// Check authentication
-	if (!authManager.isAuthenticated()) {
-		window.location.href = '/login?return=/account';
-	}
-
-	// Load user data
-	const user = authManager.getCurrentUser();
-	if (user) {
-		// Display user email
-		const userEmailEl = document.getElementById('user-email');
-		if (userEmailEl) {
-			userEmailEl.textContent = user.email;
-		}
-
-		// Load profile form
-		const firstNameInput = document.getElementById('profile-firstName') as HTMLInputElement;
-		const lastNameInput = document.getElementById('profile-lastName') as HTMLInputElement;
-		const emailInput = document.getElementById('profile-email') as HTMLInputElement;
-		const phoneInput = document.getElementById('profile-phone') as HTMLInputElement;
-
-		if (firstNameInput) firstNameInput.value = user.firstName;
-		if (lastNameInput) lastNameInput.value = user.lastName;
-		if (emailInput) emailInput.value = user.email;
-		if (phoneInput && user.phone) phoneInput.value = user.phone;
-
-		// Load orders
-		loadOrders(user.id);
-
-		// Load stats
-		loadStats(user.id);
-	}
-
-	// Show welcome banner if new user
-	const urlParams = new URLSearchParams(window.location.search);
-	if (urlParams.get('welcome') === 'true') {
-		const banner = document.getElementById('welcome-banner');
-		if (banner) {
-			banner.style.display = 'block';
-		}
-	}
-
-	// Logout handler
-	const logoutBtn = document.getElementById('logout-btn');
-	if (logoutBtn) {
-		logoutBtn.addEventListener('click', async () => {
-			if (confirm('Are you sure you want to logout?')) {
-				await authManager.logout();
-				window.location.href = '/';
-			}
-		});
-	}
-
-	// Navigation
-	const navItems = document.querySelectorAll('.nav-item');
-	const sections = document.querySelectorAll('.account-section');
-
-	navItems.forEach(item => {
-		item.addEventListener('click', () => {
-			const sectionId = item.getAttribute('data-section');
-
-			// Update nav
-			navItems.forEach(nav => nav.classList.remove('active'));
-			item.classList.add('active');
-
-			// Update sections
-			sections.forEach(section => section.classList.remove('active'));
-			const targetSection = document.getElementById(`${sectionId}-section`);
-			if (targetSection) {
-				targetSection.classList.add('active');
-			}
-		});
-	});
-
-	// Profile form submission
-	const profileForm = document.getElementById('profile-form');
-	if (profileForm) {
-		profileForm.addEventListener('submit', (e) => {
-			e.preventDefault();
-			const formData = new FormData(profileForm as HTMLFormElement);
-
-			const result = authManager.updateProfile({
-				firstName: formData.get('firstName') as string,
-				lastName: formData.get('lastName') as string,
-				email: formData.get('email') as string,
-				phone: formData.get('phone') as string
-			});
-
-			if (result.success) {
-				alert('Profile updated successfully!');
-			} else {
-				alert(result.error || 'Failed to update profile');
-			}
-		});
-	}
-
-	// Load orders
+	// Load orders function
 	function loadOrders(userId: string) {
 		const ordersList = document.getElementById('orders-list');
 		if (!ordersList) return;
@@ -780,7 +685,7 @@ import EcommerceLayout from '../layouts/EcommerceLayout.astro';
 					<div>
 						<div class="order-number">Order #${order.orderNumber}</div>
 						<div style="color: var(--secondary-color); font-size: 0.875rem; margin-top: 0.25rem;">
-							${order.createdAt.toLocaleDateString()}
+							${new Date(order.createdAt).toLocaleDateString()}
 						</div>
 					</div>
 					<span class="order-status ${order.status}">${order.status}</span>
@@ -800,7 +705,7 @@ import EcommerceLayout from '../layouts/EcommerceLayout.astro';
 		`).join('');
 	}
 
-	// Load stats
+	// Load stats function
 	function loadStats(userId: string) {
 		const stats = orderManager.getOrderStats(userId);
 
@@ -809,10 +714,117 @@ import EcommerceLayout from '../layouts/EcommerceLayout.astro';
 		const pendingOrdersEl = document.getElementById('pending-orders');
 		const completedOrdersEl = document.getElementById('completed-orders');
 
-		if (totalOrdersEl) totalOrdersEl.textContent = stats.totalOrders.toString();
+		if (totalOrdersEl) totalOrdersEl.textContent = stats.total.toString();
 		if (totalSpentEl) totalSpentEl.textContent = `$${stats.totalSpent.toFixed(2)}`;
-		if (pendingOrdersEl) pendingOrdersEl.textContent = stats.pendingOrders.toString();
-		if (completedOrdersEl) completedOrdersEl.textContent = stats.completedOrders.toString();
+		if (pendingOrdersEl) pendingOrdersEl.textContent = stats.pending.toString();
+		if (completedOrdersEl) completedOrdersEl.textContent = stats.completed.toString();
 	}
+
+	// Main initialization
+	document.addEventListener('DOMContentLoaded', () => {
+		console.log('Account page loaded');
+
+		// Check authentication
+		if (!authManager.isAuthenticated()) {
+			window.location.href = '/login?return=/account';
+			return;
+		}
+
+		// Load user data
+		const user = authManager.getCurrentUser();
+		if (user) {
+			// Display user email
+			const userEmailEl = document.getElementById('user-email');
+			if (userEmailEl) {
+				userEmailEl.textContent = user.email;
+			}
+
+			// Load profile form
+			const firstNameInput = document.getElementById('profile-firstName') as HTMLInputElement;
+			const lastNameInput = document.getElementById('profile-lastName') as HTMLInputElement;
+			const emailInput = document.getElementById('profile-email') as HTMLInputElement;
+			const phoneInput = document.getElementById('profile-phone') as HTMLInputElement;
+
+			if (firstNameInput) firstNameInput.value = user.firstName;
+			if (lastNameInput) lastNameInput.value = user.lastName;
+			if (emailInput) emailInput.value = user.email;
+			if (phoneInput && user.phone) phoneInput.value = user.phone;
+
+			// Load orders
+			loadOrders(user.id);
+
+			// Load stats
+			loadStats(user.id);
+		}
+
+		// Show welcome banner if new user
+		const urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.get('welcome') === 'true') {
+			const banner = document.getElementById('welcome-banner');
+			if (banner) {
+				banner.style.display = 'block';
+			}
+		}
+
+		// Logout handler
+		const logoutBtn = document.getElementById('logout-btn');
+		console.log('Logout button found:', logoutBtn);
+		if (logoutBtn) {
+			logoutBtn.addEventListener('click', async () => {
+				console.log('Logout button clicked');
+				if (confirm('Are you sure you want to logout?')) {
+					console.log('User confirmed logout');
+					await authManager.logout();
+					console.log('Logout completed, redirecting...');
+					window.location.href = '/';
+				}
+			});
+		} else {
+			console.error('Logout button not found!');
+		}
+
+		// Navigation
+		const navItems = document.querySelectorAll('.nav-item');
+		const sections = document.querySelectorAll('.account-section');
+
+		navItems.forEach(item => {
+			item.addEventListener('click', () => {
+				const sectionId = item.getAttribute('data-section');
+
+				// Update nav
+				navItems.forEach(nav => nav.classList.remove('active'));
+				item.classList.add('active');
+
+				// Update sections
+				sections.forEach(section => section.classList.remove('active'));
+				const targetSection = document.getElementById(`${sectionId}-section`);
+				if (targetSection) {
+					targetSection.classList.add('active');
+				}
+			});
+		});
+
+		// Profile form submission
+		const profileForm = document.getElementById('profile-form');
+		if (profileForm) {
+			profileForm.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				const formData = new FormData(profileForm as HTMLFormElement);
+
+				const result = await authManager.updateProfile({
+					firstName: formData.get('firstName') as string,
+					lastName: formData.get('lastName') as string,
+					email: formData.get('email') as string,
+					phone: formData.get('phone') as string
+				});
+
+				if (result.success) {
+					alert('Profile updated successfully!');
+				} else {
+					alert(result.error || 'Failed to update profile');
+				}
+			});
+		}
+	});
 </script>
 
