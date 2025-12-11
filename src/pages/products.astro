@@ -867,20 +867,61 @@ const colors = mockColors;
 		text-decoration: line-through;
 	}
 
-	.product-grid .quick-add-btn {
-		width: 100%;
-		padding: 0.875rem;
-		background: var(--primary-color);
-		color: white;
-		border: none;
-		font-size: 0.875rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
+	.product-grid .product-actions {
+		display: flex;
+		gap: 0.5rem;
+		padding: 0 1rem 1rem 1rem;
 	}
 
-	.product-grid .quick-add-btn:hover {
-		background: #5b21b6;
+	.product-grid .view-details-btn {
+		flex: 1;
+		padding: 0.75rem;
+		background: #f3f4f6;
+		color: #374151;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		text-decoration: none;
+		font-weight: 600;
+		font-size: 0.8rem;
+		text-align: center;
+		transition: all 0.2s ease;
+	}
+
+	.product-grid .view-details-btn:hover {
+		background: #e5e7eb;
+		color: #1f2937;
+	}
+
+	.product-grid .wishlist-btn {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		padding: 0.75rem;
+		background: linear-gradient(135deg, #ec4899, #f43f5e);
+		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-weight: 600;
+		font-size: 0.8rem;
+	}
+
+	.product-grid .wishlist-btn:hover {
+		background: linear-gradient(135deg, #db2777, #e11d48);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
+	}
+
+	.product-grid .wishlist-btn.added {
+		background: linear-gradient(135deg, #10b981, #059669);
+	}
+
+	.product-grid .wishlist-btn.added:hover {
+		background: linear-gradient(135deg, #059669, #047857);
+		box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 	}
 </style>
 
@@ -1132,6 +1173,10 @@ const colors = mockColors;
 				const hasDiscount = product.salePrice && product.salePrice < product.price;
 				const discountPercent = hasDiscount ? Math.round((1 - product.salePrice / product.price) * 100) : 0;
 
+				// Check if product is in wishlist
+				const wishlist = JSON.parse(localStorage.getItem('fashionhub_wishlist') || '[]');
+				const isInWishlist = wishlist.includes(product.id);
+
 				return `
 					<div class="product-card" data-product-id="${product.id}">
 						<a href="/products/${product.id}" class="product-link">
@@ -1153,9 +1198,15 @@ const colors = mockColors;
 								</div>
 							</div>
 						</a>
-						<button class="quick-add-btn" onclick="event.preventDefault(); alert('Added to cart!')">
-							Add to Cart
-						</button>
+						<div class="product-actions">
+							<a href="/products/${product.id}" class="view-details-btn">View Details</a>
+							<button class="wishlist-btn ${isInWishlist ? 'added' : ''}" data-product-id="${product.id}">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="${isInWishlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+									<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+								</svg>
+								${isInWishlist ? 'Added' : 'Wishlist'}
+							</button>
+						</div>
 					</div>
 				`;
 			}).join('');
@@ -1164,6 +1215,42 @@ const colors = mockColors;
 		if (productsCount) {
 			productsCount.textContent = `${filteredProducts.length} products`;
 		}
+
+		// Add wishlist button handlers
+		document.querySelectorAll('.product-grid .wishlist-btn').forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				e.preventDefault();
+				const productId = btn.getAttribute('data-product-id');
+				if (!productId) return;
+
+				let wishlist = JSON.parse(localStorage.getItem('fashionhub_wishlist') || '[]');
+
+				if (wishlist.includes(productId)) {
+					// Remove from wishlist
+					wishlist = wishlist.filter((id: string) => id !== productId);
+					btn.classList.remove('added');
+					btn.innerHTML = `
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+						</svg>
+						Wishlist
+					`;
+				} else {
+					// Add to wishlist
+					wishlist.push(productId);
+					btn.classList.add('added');
+					btn.innerHTML = `
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+							<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+						</svg>
+						Added
+					`;
+				}
+
+				localStorage.setItem('fashionhub_wishlist', JSON.stringify(wishlist));
+				window.dispatchEvent(new CustomEvent('wishlist-updated'));
+			});
+		});
 	}
 
 	function clearAllFilters() {
