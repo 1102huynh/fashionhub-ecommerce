@@ -203,9 +203,11 @@ class AuthManager {
 
   // Logout
   async logout(): Promise<void> {
+    console.log('Logout started...');
     try {
       const token = this.getToken();
       if (token) {
+        console.log('Calling logout API...');
         await fetch(`${API_BASE_URL}/auth/logout`, {
           method: 'POST',
           headers: {
@@ -213,14 +215,18 @@ class AuthManager {
             'Authorization': `Bearer ${token}`
           },
         });
+        console.log('Logout API called successfully');
       }
     } catch (error) {
       console.error('Logout API error:', error);
     }
 
+    console.log('Clearing localStorage...');
     localStorage.removeItem(this.STORAGE_KEY);
     localStorage.removeItem(this.TOKEN_KEY);
+    console.log('localStorage cleared');
     this.dispatchAuthEvent();
+    console.log('Logout complete');
   }
 
   // Verify token with backend

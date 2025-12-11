@@ -704,9 +704,9 @@ import EcommerceLayout from '../layouts/EcommerceLayout.astro';
 	// Logout handler
 	const logoutBtn = document.getElementById('logout-btn');
 	if (logoutBtn) {
-		logoutBtn.addEventListener('click', () => {
+		logoutBtn.addEventListener('click', async () => {
 			if (confirm('Are you sure you want to logout?')) {
-				authManager.logout();
+				await authManager.logout();
 				window.location.href = '/';
 			}
 		});
