@@ -937,8 +937,6 @@ const colors = mockColors;
 		if (window.__PRODUCTS_DATA__) {
 			allProducts = [...window.__PRODUCTS_DATA__];
 			filteredProducts = [...window.__PRODUCTS_DATA__];
-			console.log('Loaded products from window:', allProducts.length);
-			console.log('Product IDs:', allProducts.map(p => p.id));
 		}
 
 		// Try to fetch products from API
@@ -1090,8 +1088,6 @@ const colors = mockColors;
 	}
 
 	function applyFilters() {
-		console.log('Applying filters:', currentFilters);
-		console.log('All products:', allProducts.length);
 
 		filteredProducts = allProducts.filter(product => {
 			// Category filter - category is an object with id, name, slug
@@ -1144,7 +1140,6 @@ const colors = mockColors;
 			return true;
 		});
 
-		console.log('Filtered products:', filteredProducts.length);
 		renderProducts();
 		updateActiveFiltersTags();
 	}
@@ -1185,15 +1180,8 @@ const colors = mockColors;
 		// Get all product cards
 		const allCards = grid.querySelectorAll('.product-card');
 		
-		// Debug: log card IDs
-		console.log('All cards in DOM:', allCards.length);
-		allCards.forEach(card => {
-			console.log('Card ID:', card.getAttribute('data-product-id'));
-		});
-
 		// Get filtered product IDs
 		const filteredIds = new Set(filteredProducts.map(p => p.id));
-		console.log('Filtered IDs:', Array.from(filteredIds));
 
 		let visibleCount = 0;
 		
@@ -1201,7 +1189,6 @@ const colors = mockColors;
 		allCards.forEach(card => {
 			const productId = card.getAttribute('data-product-id');
 			const isVisible = filteredIds.has(productId);
-			console.log(`Card ${productId}: visible=${isVisible}`);
 
 			if (isVisible) {
 				(card as HTMLElement).style.display = '';
@@ -1211,7 +1198,6 @@ const colors = mockColors;
 			}
 		});
 
-		console.log('Visible count:', visibleCount);
 
 		// Update count
 		if (productsCount) {
