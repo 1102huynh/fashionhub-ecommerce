@@ -3,8 +3,7 @@ import EcommerceLayout from '../layouts/EcommerceLayout.astro';
 import ProductCard from '../components/ecommerce/ProductCardEnhanced.astro';
 import { mockProducts, mockCategories, mockSizes, mockColors } from '../utils/mock-data.js';
 
-
-// Get all products for now (in a real app, this would handle filtering and pagination)
+// Get all products for initial render
 const products = mockProducts;
 const categories = mockCategories;
 const sizes = mockSizes;
@@ -23,14 +22,26 @@ const colors = mockColors;
 		<p>Discover our complete collection of premium clothing and accessories</p>
 	</div>
 
+	<!-- Mobile Filter Toggle -->
+	<button id="mobile-filter-toggle" class="mobile-filter-btn">
+		<span>🔍</span> Filters
+		<span id="active-filters-count" class="filter-count" style="display: none;">0</span>
+	</button>
+
 	<div class="products-layout">
-		<aside class="filters-sidebar">
+		<aside class="filters-sidebar" id="filters-sidebar">
+			<div class="filters-header">
+				<h2>Filters</h2>
+				<button id="close-filters" class="close-filters-btn">✕</button>
+			</div>
+
 			<div class="filter-section">
 				<h3>Categories</h3>
 				<div class="filter-group">
 					{categories.map(category => (
 						<label class="filter-item">
-							<input type="checkbox" name="category" value={category.id}>
+							<input type="checkbox" name="category" value={category.id} data-filter="category">
+							<span class="checkbox-custom"></span>
 							<span>{category.name}</span>
 						</label>
 					))}
@@ -39,10 +50,10 @@ const colors = mockColors;
 
 			<div class="filter-section">
 				<h3>Size</h3>
-				<div class="filter-group">
+				<div class="filter-group size-group">
 					{sizes.map(size => (
 						<label class="filter-item size-filter">
-							<input type="checkbox" name="size" value={size.id}>
+							<input type="checkbox" name="size" value={size.id} data-filter="size">
 							<span class="size-badge">{size.name}</span>
 						</label>
 					))}
@@ -54,7 +65,7 @@ const colors = mockColors;
 				<div class="filter-group color-group">
 					{colors.map(color => (
 						<label class="color-item" title={color.name}>
-							<input type="checkbox" name="color" value={color.id}>
+							<input type="checkbox" name="color" value={color.id} data-filter="color">
 							<span class="color-swatch" style={`background-color: ${color.value}`}></span>
 						</label>
 					))}
@@ -64,52 +75,85 @@ const colors = mockColors;
 			<div class="filter-section">
 				<h3>Price Range</h3>
 				<div class="price-range">
-					<label for="price-min" class="sr-only">Minimum price</label>
-					<input type="range" id="price-min" min="0" max="200" value="0" class="price-slider">
-					<label for="price-max" class="sr-only">Maximum price</label>
-					<input type="range" id="price-max" min="0" max="200" value="200" class="price-slider">
-					<div class="price-display">
-						<span>$<span id="price-min-value">0</span> - $<span id="price-max-value">200</span></span>
+					<div class="price-inputs">
+						<div class="price-input-group">
+							<label for="price-min">Min</label>
+							<input type="number" id="price-min" min="0" max="500" value="0" class="price-input">
+						</div>
+						<span class="price-separator">-</span>
+						<div class="price-input-group">
+							<label for="price-max">Max</label>
+							<input type="number" id="price-max" min="0" max="500" value="500" class="price-input">
+						</div>
 					</div>
+					<input type="range" id="price-slider" min="0" max="500" value="500" class="price-slider-range">
 				</div>
 			</div>
 
-			<div class="filter-section">
-				<label class="filter-item">
-					<input type="checkbox" name="featured" value="true">
+			<div class="filter-section special-filters">
+				<label class="filter-item toggle-item">
+					<input type="checkbox" name="featured" value="true" data-filter="featured">
+					<span class="toggle-switch"></span>
 					<span>Featured Items</span>
 				</label>
-				<label class="filter-item">
-					<input type="checkbox" name="sale" value="true">
+				<label class="filter-item toggle-item">
+					<input type="checkbox" name="sale" value="true" data-filter="sale">
+					<span class="toggle-switch"></span>
 					<span>On Sale</span>
 				</label>
-				<label class="filter-item">
-					<input type="checkbox" name="inStock" value="true">
-					<span>In Stock</span>
+				<label class="filter-item toggle-item">
+					<input type="checkbox" name="inStock" value="true" data-filter="inStock">
+					<span class="toggle-switch"></span>
+					<span>In Stock Only</span>
 				</label>
 			</div>
 
-			<button id="clear-filters" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">
-				Clear All Filters
-			</button>
+			<div class="filter-actions">
+				<button id="apply-filters" class="btn btn-primary">Apply Filters</button>
+				<button id="clear-filters" class="btn btn-outline">Clear All</button>
+			</div>
 		</aside>
 
 		<main class="products-main">
 			<div class="products-header">
 				<div class="products-info">
 					<span id="products-count">{products.length} products</span>
+					<div id="active-filters" class="active-filters"></div>
 				</div>
-				<div class="sort-controls">
-					<label for="sort-select" class="sr-only">Sort products</label>
+				<div class="view-controls">
+					<div class="view-toggle">
+						<button id="grid-view" class="view-btn active" title="Grid View">
+							<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+								<rect x="0" y="0" width="7" height="7" rx="1"/>
+								<rect x="9" y="0" width="7" height="7" rx="1"/>
+								<rect x="0" y="9" width="7" height="7" rx="1"/>
+								<rect x="9" y="9" width="7" height="7" rx="1"/>
+							</svg>
+						</button>
+						<button id="list-view" class="view-btn" title="List View">
+							<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+								<rect x="0" y="0" width="16" height="4" rx="1"/>
+								<rect x="0" y="6" width="16" height="4" rx="1"/>
+								<rect x="0" y="12" width="16" height="4" rx="1"/>
+							</svg>
+						</button>
+					</div>
 					<select id="sort-select" class="sort-dropdown">
-						<option value="name-asc">Name (A-Z)</option>
-						<option value="name-desc">Name (Z-A)</option>
-						<option value="price-asc">Price (Low to High)</option>
-						<option value="price-desc">Price (High to Low)</option>
-						<option value="rating-desc">Highest Rated</option>
-						<option value="newest">Newest First</option>
+						<option value="featured">Featured</option>
+						<option value="newest">Newest</option>
+						<option value="price-asc">Price: Low to High</option>
+						<option value="price-desc">Price: High to Low</option>
+						<option value="name-asc">Name: A-Z</option>
+						<option value="name-desc">Name: Z-A</option>
+						<option value="rating">Top Rated</option>
 					</select>
 				</div>
+			</div>
+
+			<!-- Loading State -->
+			<div id="loading-state" class="loading-state" style="display: none;">
+				<div class="loading-spinner"></div>
+				<p>Loading products...</p>
 			</div>
 
 			<div id="products-grid" class="product-grid">
@@ -119,27 +163,65 @@ const colors = mockColors;
 			</div>
 
 			<div id="no-results" class="no-results" style="display: none;">
-				<p>No products found matching your criteria.</p>
-				<button id="reset-filters" class="btn">Reset Filters</button>
+				<div class="no-results-icon">🔍</div>
+				<h3>No products found</h3>
+				<p>Try adjusting your filters or search terms</p>
+				<button id="reset-filters" class="btn btn-primary">Reset Filters</button>
 			</div>
 		</main>
 	</div>
+
+	<!-- Filter Overlay for Mobile -->
+	<div id="filter-overlay" class="filter-overlay"></div>
 </EcommerceLayout>
 
 <style>
 	.page-header {
 		text-align: center;
 		margin-bottom: 2rem;
+		padding: 2rem 0;
+		background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+		border-radius: 1rem;
 	}
 
 	.page-header h1 {
 		font-size: 2.5rem;
 		margin-bottom: 0.5rem;
+		background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
 	}
 
 	.page-header p {
 		color: var(--secondary-color);
 		font-size: 1.1rem;
+	}
+
+	/* Mobile Filter Button */
+	.mobile-filter-btn {
+		display: none;
+		width: 100%;
+		padding: 1rem;
+		background: var(--primary-color);
+		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		margin-bottom: 1rem;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+
+	.filter-count {
+		background: white;
+		color: var(--primary-color);
+		padding: 0.125rem 0.5rem;
+		border-radius: 1rem;
+		font-size: 0.75rem;
 	}
 
 	.products-layout {
@@ -149,13 +231,39 @@ const colors = mockColors;
 		margin-top: 2rem;
 	}
 
+	/* Filters Sidebar */
 	.filters-sidebar {
-		background: var(--card-background);
+		background: white;
 		padding: 1.5rem;
-		border-radius: 0.5rem;
+		border-radius: 1rem;
 		height: fit-content;
 		position: sticky;
-		top: 120px;
+		top: 100px;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+		border: 1px solid var(--border-color);
+	}
+
+	.filters-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.5rem;
+		padding-bottom: 1rem;
+		border-bottom: 2px solid var(--primary-color);
+	}
+
+	.filters-header h2 {
+		font-size: 1.25rem;
+		margin: 0;
+	}
+
+	.close-filters-btn {
+		display: none;
+		background: none;
+		border: none;
+		font-size: 1.5rem;
+		cursor: pointer;
+		color: var(--secondary-color);
 	}
 
 	.filter-section {
@@ -164,14 +272,15 @@ const colors = mockColors;
 		border-bottom: 1px solid var(--border-color);
 	}
 
-	.filter-section:last-child {
+	.filter-section:last-of-type {
 		border-bottom: none;
-		margin-bottom: 0;
-		padding-bottom: 0;
 	}
 
 	.filter-section h3 {
-		font-size: 1rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
 		margin-bottom: 1rem;
 		color: var(--text-color);
 	}
@@ -179,34 +288,72 @@ const colors = mockColors;
 	.filter-group {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.75rem;
 	}
 
 	.filter-item {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.75rem;
 		cursor: pointer;
-		font-size: 0.875rem;
+		font-size: 0.9rem;
+		transition: color 0.2s;
+	}
+
+	.filter-item:hover {
+		color: var(--primary-color);
 	}
 
 	.filter-item input[type="checkbox"] {
-		margin: 0;
+		display: none;
+	}
+
+	.checkbox-custom {
+		width: 18px;
+		height: 18px;
+		border: 2px solid var(--border-color);
+		border-radius: 4px;
+		position: relative;
+		transition: all 0.2s;
+		flex-shrink: 0;
+	}
+
+	.filter-item input:checked + .checkbox-custom {
+		background: var(--primary-color);
+		border-color: var(--primary-color);
+	}
+
+	.filter-item input:checked + .checkbox-custom::after {
+		content: '✓';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		color: white;
+		font-size: 12px;
+	}
+
+	/* Size Filters */
+	.size-group {
+		flex-direction: row;
+		flex-wrap: wrap;
 	}
 
 	.size-filter {
 		display: inline-flex;
-		width: auto;
 	}
 
 	.size-badge {
-		background: white;
-		border: 1px solid var(--border-color);
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.25rem;
-		font-size: 0.75rem;
-		min-width: 2rem;
-		text-align: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 40px;
+		height: 40px;
+		background: #f8f9fa;
+		border: 2px solid var(--border-color);
+		border-radius: 8px;
+		font-size: 0.875rem;
+		font-weight: 500;
 		transition: all 0.2s;
 	}
 
@@ -214,18 +361,26 @@ const colors = mockColors;
 		background: var(--primary-color);
 		color: white;
 		border-color: var(--primary-color);
+		transform: scale(1.05);
 	}
 
+	.size-filter:hover .size-badge {
+		border-color: var(--primary-color);
+	}
+
+	/* Color Filters */
 	.color-group {
-		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: 0.75rem;
 	}
 
 	.color-item {
 		cursor: pointer;
-		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
 	}
 
 	.color-item input {
@@ -233,12 +388,16 @@ const colors = mockColors;
 	}
 
 	.color-swatch {
-		display: block;
-		width: 2rem;
-		height: 2rem;
+		width: 32px;
+		height: 32px;
 		border-radius: 50%;
-		border: 2px solid transparent;
+		border: 3px solid transparent;
 		transition: all 0.2s;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+	}
+
+	.color-item:hover .color-swatch {
+		transform: scale(1.1);
 	}
 
 	.color-item input:checked + .color-swatch {
@@ -246,36 +405,116 @@ const colors = mockColors;
 		box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color);
 	}
 
-	.price-range {
-		position: relative;
+	/* Price Range */
+	.price-inputs {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
 	}
 
-	.price-slider {
+	.price-input-group {
+		flex: 1;
+	}
+
+	.price-input-group label {
+		display: block;
+		font-size: 0.75rem;
+		color: var(--secondary-color);
+		margin-bottom: 0.25rem;
+	}
+
+	.price-input {
 		width: 100%;
-		margin: 0.5rem 0;
-		-webkit-appearance: none;
-		height: 4px;
-		background: var(--border-color);
-		border-radius: 2px;
+		padding: 0.5rem;
+		border: 1px solid var(--border-color);
+		border-radius: 0.5rem;
+		font-size: 0.875rem;
 	}
 
-	.price-slider::-webkit-slider-thumb {
+	.price-separator {
+		color: var(--secondary-color);
+		padding-top: 1rem;
+	}
+
+	.price-slider-range {
+		width: 100%;
+		height: 6px;
 		-webkit-appearance: none;
-		width: 16px;
-		height: 16px;
+		background: linear-gradient(to right, var(--primary-color) 0%, #e5e7eb 0%);
+		border-radius: 3px;
+		outline: none;
+	}
+
+	.price-slider-range::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		width: 20px;
+		height: 20px;
 		background: var(--primary-color);
 		border-radius: 50%;
 		cursor: pointer;
+		box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 	}
 
-	.price-display {
-		text-align: center;
-		font-size: 0.875rem;
-		color: var(--secondary-color);
+	/* Toggle Switches */
+	.special-filters {
+		border-bottom: none !important;
 	}
 
+	.toggle-item {
+		justify-content: flex-start;
+	}
+
+	.toggle-switch {
+		width: 44px;
+		height: 24px;
+		background: #e5e7eb;
+		border-radius: 12px;
+		position: relative;
+		transition: all 0.3s;
+		flex-shrink: 0;
+	}
+
+	.toggle-switch::after {
+		content: '';
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		background: white;
+		border-radius: 50%;
+		top: 2px;
+		left: 2px;
+		transition: all 0.3s;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+	}
+
+	.toggle-item input:checked + .toggle-switch {
+		background: var(--primary-color);
+	}
+
+	.toggle-item input:checked + .toggle-switch::after {
+		transform: translateX(20px);
+	}
+
+	/* Filter Actions */
+	.filter-actions {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.filter-actions .btn {
+		width: 100%;
+		padding: 0.75rem;
+		font-weight: 600;
+	}
+
+	/* Products Main */
 	.products-main {
-		min-height: 400px;
+		min-height: 500px;
 	}
 
 	.products-header {
@@ -283,149 +522,605 @@ const colors = mockColors;
 		justify-content: space-between;
 		align-items: center;
 		margin-bottom: 1.5rem;
-		padding-bottom: 1rem;
-		border-bottom: 1px solid var(--border-color);
+		padding: 1rem 1.5rem;
+		background: white;
+		border-radius: 0.75rem;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+		flex-wrap: wrap;
+		gap: 1rem;
 	}
 
 	.products-info {
-		color: var(--secondary-color);
-		font-size: 0.875rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
 	}
 
-	.sort-dropdown {
-		padding: 0.5rem;
-		border: 1px solid var(--border-color);
-		border-radius: 0.25rem;
-		background: white;
+	#products-count {
+		font-weight: 600;
 		color: var(--text-color);
 	}
 
-	.no-results {
-		text-align: center;
-		padding: 3rem;
+	.active-filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.active-filter-tag {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.75rem;
+		background: var(--primary-color);
+		color: white;
+		border-radius: 1rem;
+		font-size: 0.75rem;
+		cursor: pointer;
+	}
+
+	.active-filter-tag:hover {
+		background: #5b21b6;
+	}
+
+	.view-controls {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.view-toggle {
+		display: flex;
+		background: #f3f4f6;
+		border-radius: 0.5rem;
+		padding: 0.25rem;
+	}
+
+	.view-btn {
+		padding: 0.5rem;
+		background: none;
+		border: none;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		color: var(--secondary-color);
+		transition: all 0.2s;
+	}
+
+	.view-btn.active {
+		background: white;
+		color: var(--primary-color);
+		box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+	}
+
+	.sort-dropdown {
+		padding: 0.625rem 1rem;
+		border: 1px solid var(--border-color);
+		border-radius: 0.5rem;
+		background: white;
+		color: var(--text-color);
+		font-size: 0.875rem;
+		cursor: pointer;
+		min-width: 180px;
+	}
+
+	/* Loading State */
+	.loading-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 4rem;
 		color: var(--secondary-color);
 	}
 
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border: 0;
+	.loading-spinner {
+		width: 48px;
+		height: 48px;
+		border: 3px solid var(--border-color);
+		border-top-color: var(--primary-color);
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin-bottom: 1rem;
+	}
+
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+
+	/* Product Grid */
+	.product-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.product-grid.list-view {
+		grid-template-columns: 1fr;
+	}
+
+	/* No Results */
+	.no-results {
+		text-align: center;
+		padding: 4rem 2rem;
+		background: white;
+		border-radius: 1rem;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+	}
+
+	.no-results-icon {
+		font-size: 4rem;
+		margin-bottom: 1rem;
+	}
+
+	.no-results h3 {
+		margin-bottom: 0.5rem;
+		color: var(--text-color);
+	}
+
+	.no-results p {
+		color: var(--secondary-color);
+		margin-bottom: 1.5rem;
+	}
+
+	/* Filter Overlay */
+	.filter-overlay {
+		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0,0,0,0.5);
+		z-index: 998;
+	}
+
+	.filter-overlay.active {
+		display: block;
+	}
+
+	/* Mobile Responsive */
+	@media (max-width: 1024px) {
+		.product-grid {
+			grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		}
 	}
 
 	@media (max-width: 768px) {
+		.mobile-filter-btn {
+			display: flex;
+		}
+
 		.products-layout {
 			grid-template-columns: 1fr;
 		}
 
 		.filters-sidebar {
-			position: static;
-			order: 2;
+			position: fixed;
+			top: 0;
+			left: -100%;
+			width: 85%;
+			max-width: 350px;
+			height: 100vh;
+			z-index: 999;
+			border-radius: 0;
+			transition: left 0.3s ease;
+			overflow-y: auto;
 		}
 
-		.products-main {
-			order: 1;
+		.filters-sidebar.active {
+			left: 0;
+		}
+
+		.close-filters-btn {
+			display: block;
 		}
 
 		.products-header {
 			flex-direction: column;
-			gap: 1rem;
 			align-items: stretch;
+		}
+
+		.view-controls {
+			justify-content: space-between;
+		}
+
+		.product-grid {
+			grid-template-columns: repeat(2, 1fr);
+			gap: 1rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.page-header h1 {
+			font-size: 1.75rem;
+		}
+
+		.product-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
 
 <script>
-	// Simplified product filtering functionality
+	import { mockProducts } from '../utils/mock-data';
+
+	const API_BASE_URL = 'http://localhost:3001/api';
+	let allProducts = [...mockProducts];
+	let filteredProducts = [...mockProducts];
+	let currentFilters: any = {
+		categories: [],
+		sizes: [],
+		colors: [],
+		priceMin: 0,
+		priceMax: 500,
+		featured: false,
+		sale: false,
+		inStock: false
+	};
+
 	document.addEventListener('DOMContentLoaded', () => {
-		const products = document.querySelectorAll('.product-card');
-		const productsGrid = document.getElementById('products-grid');
-		const productsCount = document.getElementById('products-count');
-		const noResults = document.getElementById('no-results');
-		const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
-		const clearFiltersBtn = document.getElementById('clear-filters');
+		// Try to fetch products from API
+		fetchProducts();
+
+		// Mobile filter toggle
+		const mobileFilterBtn = document.getElementById('mobile-filter-toggle');
+		const filtersSidebar = document.getElementById('filters-sidebar');
+		const filterOverlay = document.getElementById('filter-overlay');
+		const closeFiltersBtn = document.getElementById('close-filters');
+
+		mobileFilterBtn?.addEventListener('click', () => {
+			filtersSidebar?.classList.add('active');
+			filterOverlay?.classList.add('active');
+			document.body.style.overflow = 'hidden';
+		});
+
+		const closeFilters = () => {
+			filtersSidebar?.classList.remove('active');
+			filterOverlay?.classList.remove('active');
+			document.body.style.overflow = '';
+		};
+
+		closeFiltersBtn?.addEventListener('click', closeFilters);
+		filterOverlay?.addEventListener('click', closeFilters);
 
 		// Filter checkboxes
-		document.querySelectorAll('input[type="checkbox"]').forEach(input => {
-			input.addEventListener('change', applyFilters);
+		document.querySelectorAll('input[data-filter]').forEach(input => {
+			input.addEventListener('change', handleFilterChange);
 		});
 
-		// Price range sliders
+		// Price inputs
 		const priceMin = document.getElementById('price-min') as HTMLInputElement;
 		const priceMax = document.getElementById('price-max') as HTMLInputElement;
-		const priceMinValue = document.getElementById('price-min-value');
-		const priceMaxValue = document.getElementById('price-max-value');
+		const priceSlider = document.getElementById('price-slider') as HTMLInputElement;
 
-		priceMin?.addEventListener('input', (e) => {
-			const target = e.target as HTMLInputElement;
-			if (priceMinValue) priceMinValue.textContent = target.value;
-			applyFilters();
+		priceMin?.addEventListener('input', () => {
+			currentFilters.priceMin = parseInt(priceMin.value) || 0;
 		});
 
-		priceMax?.addEventListener('input', (e) => {
-			const target = e.target as HTMLInputElement;
-			if (priceMaxValue) priceMaxValue.textContent = target.value;
-			applyFilters();
+		priceMax?.addEventListener('input', () => {
+			currentFilters.priceMax = parseInt(priceMax.value) || 500;
+			if (priceSlider) priceSlider.value = priceMax.value;
+			updatePriceSliderBackground();
 		});
 
-		// Sort dropdown
-		sortSelect?.addEventListener('change', applySort);
+		priceSlider?.addEventListener('input', () => {
+			currentFilters.priceMax = parseInt(priceSlider.value);
+			if (priceMax) priceMax.value = priceSlider.value;
+			updatePriceSliderBackground();
+		});
+
+		function updatePriceSliderBackground() {
+			if (!priceSlider) return;
+			const value = (parseInt(priceSlider.value) / 500) * 100;
+			priceSlider.style.background = `linear-gradient(to right, var(--primary-color) ${value}%, #e5e7eb ${value}%)`;
+		}
+
+		// Apply filters button
+		document.getElementById('apply-filters')?.addEventListener('click', () => {
+			applyFilters();
+			closeFilters();
+		});
 
 		// Clear filters
-		clearFiltersBtn?.addEventListener('click', clearAllFilters);
+		document.getElementById('clear-filters')?.addEventListener('click', clearAllFilters);
+		document.getElementById('reset-filters')?.addEventListener('click', clearAllFilters);
 
-		function applyFilters() {
-			let visibleCount = 0;
+		// Sort dropdown
+		document.getElementById('sort-select')?.addEventListener('change', (e) => {
+			const sortBy = (e.target as HTMLSelectElement).value;
+			sortProducts(sortBy);
+		});
 
-			products.forEach(product => {
-				// For demo purposes, just show all products
-				// In a real app, you'd implement actual filtering logic here
-				const isVisible = true;
-				(product as HTMLElement).style.display = isVisible ? 'block' : 'none';
-				if (isVisible) visibleCount++;
-			});
+		// View toggle
+		const gridViewBtn = document.getElementById('grid-view');
+		const listViewBtn = document.getElementById('list-view');
+		const productsGrid = document.getElementById('products-grid');
 
-			updateUI(visibleCount);
-		}
+		gridViewBtn?.addEventListener('click', () => {
+			gridViewBtn.classList.add('active');
+			listViewBtn?.classList.remove('active');
+			productsGrid?.classList.remove('list-view');
+		});
 
-		function applySort() {
-			// Simplified sorting - in a real app, you'd sort based on actual product data
-			console.log('Sorting products...');
-		}
-
-		function updateUI(visibleCount: number) {
-			if (productsCount) {
-				productsCount.textContent = `${visibleCount} products`;
-			}
-
-			if (noResults) {
-				noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-			}
-		}
-
-		function clearAllFilters() {
-			document.querySelectorAll('input[type="checkbox"]').forEach(input => {
-				(input as HTMLInputElement).checked = false;
-			});
-
-			if (priceMin) {
-				priceMin.value = '0';
-				if (priceMinValue) priceMinValue.textContent = '0';
-			}
-			if (priceMax) {
-				priceMax.value = '200';
-				if (priceMaxValue) priceMaxValue.textContent = '200';
-			}
-
-			applyFilters();
-		}
-
-		// Initial setup
-		applyFilters();
+		listViewBtn?.addEventListener('click', () => {
+			listViewBtn.classList.add('active');
+			gridViewBtn?.classList.remove('active');
+			productsGrid?.classList.add('list-view');
+		});
 	});
+
+	async function fetchProducts() {
+		try {
+			const response = await fetch(`${API_BASE_URL}/products`);
+			if (response.ok) {
+				const data = await response.json();
+				if (data.products && data.products.length > 0) {
+					allProducts = data.products;
+					filteredProducts = [...allProducts];
+					console.log('Loaded products from API');
+				}
+			}
+		} catch (error) {
+			console.log('Using mock products');
+		}
+	}
+
+	function handleFilterChange(e: Event) {
+		const input = e.target as HTMLInputElement;
+		const filterType = input.dataset.filter;
+		const value = input.value;
+		const checked = input.checked;
+
+		switch (filterType) {
+			case 'category':
+				if (checked) {
+					currentFilters.categories.push(value);
+				} else {
+					currentFilters.categories = currentFilters.categories.filter((c: string) => c !== value);
+				}
+				break;
+			case 'size':
+				if (checked) {
+					currentFilters.sizes.push(value);
+				} else {
+					currentFilters.sizes = currentFilters.sizes.filter((s: string) => s !== value);
+				}
+				break;
+			case 'color':
+				if (checked) {
+					currentFilters.colors.push(value);
+				} else {
+					currentFilters.colors = currentFilters.colors.filter((c: string) => c !== value);
+				}
+				break;
+			case 'featured':
+				currentFilters.featured = checked;
+				break;
+			case 'sale':
+				currentFilters.sale = checked;
+				break;
+			case 'inStock':
+				currentFilters.inStock = checked;
+				break;
+		}
+
+		updateActiveFiltersCount();
+	}
+
+	function applyFilters() {
+		filteredProducts = allProducts.filter(product => {
+			// Category filter
+			if (currentFilters.categories.length > 0) {
+				if (!currentFilters.categories.includes(product.category.toLowerCase())) {
+					return false;
+				}
+			}
+
+			// Price filter
+			const price = product.salePrice || product.price;
+			if (price < currentFilters.priceMin || price > currentFilters.priceMax) {
+				return false;
+			}
+
+			// Featured filter
+			if (currentFilters.featured && !product.featured) {
+				return false;
+			}
+
+			// Sale filter
+			if (currentFilters.sale && !product.salePrice) {
+				return false;
+			}
+
+			// In stock filter
+			if (currentFilters.inStock && product.stock <= 0) {
+				return false;
+			}
+
+			return true;
+		});
+
+		renderProducts();
+		updateActiveFiltersTags();
+	}
+
+	function sortProducts(sortBy: string) {
+		switch (sortBy) {
+			case 'price-asc':
+				filteredProducts.sort((a, b) => (a.salePrice || a.price) - (b.salePrice || b.price));
+				break;
+			case 'price-desc':
+				filteredProducts.sort((a, b) => (b.salePrice || b.price) - (a.salePrice || a.price));
+				break;
+			case 'name-asc':
+				filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+				break;
+			case 'name-desc':
+				filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
+				break;
+			case 'rating':
+				filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+				break;
+			case 'featured':
+				filteredProducts.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+				break;
+			default:
+				break;
+		}
+		renderProducts();
+	}
+
+	function renderProducts() {
+		const grid = document.getElementById('products-grid');
+		const noResults = document.getElementById('no-results');
+		const productsCount = document.getElementById('products-count');
+
+		if (!grid) return;
+
+		if (filteredProducts.length === 0) {
+			grid.style.display = 'none';
+			if (noResults) noResults.style.display = 'block';
+		} else {
+			grid.style.display = 'grid';
+			if (noResults) noResults.style.display = 'none';
+
+			grid.innerHTML = filteredProducts.map(product => {
+				const primaryImage = product.images?.find((img: any) => img.isPrimary) || product.images?.[0];
+				const hasDiscount = product.salePrice && product.salePrice < product.price;
+				const discountPercent = hasDiscount ? Math.round((1 - product.salePrice / product.price) * 100) : 0;
+
+				return `
+					<div class="product-card" data-product-id="${product.id}">
+						<a href="/products/${product.id}" class="product-link">
+							<div class="product-image-wrapper">
+								<img src="${primaryImage?.url || 'https://via.placeholder.com/300'}" alt="${product.name}" class="product-image" loading="lazy">
+								${hasDiscount ? `<span class="discount-badge">-${discountPercent}%</span>` : ''}
+								${product.featured ? '<span class="featured-badge">Featured</span>' : ''}
+							</div>
+							<div class="product-info">
+								<div class="product-category">${product.category}</div>
+								<h3 class="product-name">${product.name}</h3>
+								<div class="product-rating">
+									${'★'.repeat(Math.floor(product.rating || 0))}${'☆'.repeat(5 - Math.floor(product.rating || 0))}
+									<span>(${product.reviewCount || 0})</span>
+								</div>
+								<div class="product-price">
+									${hasDiscount ? `<span class="original-price">$${product.price.toFixed(2)}</span>` : ''}
+									<span class="current-price">$${(product.salePrice || product.price).toFixed(2)}</span>
+								</div>
+							</div>
+						</a>
+						<button class="quick-add-btn" onclick="event.preventDefault(); alert('Added to cart!')">
+							Add to Cart
+						</button>
+					</div>
+				`;
+			}).join('');
+		}
+
+		if (productsCount) {
+			productsCount.textContent = `${filteredProducts.length} products`;
+		}
+	}
+
+	function clearAllFilters() {
+		currentFilters = {
+			categories: [],
+			sizes: [],
+			colors: [],
+			priceMin: 0,
+			priceMax: 500,
+			featured: false,
+			sale: false,
+			inStock: false
+		};
+
+		// Reset all checkboxes
+		document.querySelectorAll('input[data-filter]').forEach(input => {
+			(input as HTMLInputElement).checked = false;
+		});
+
+		// Reset price inputs
+		const priceMin = document.getElementById('price-min') as HTMLInputElement;
+		const priceMax = document.getElementById('price-max') as HTMLInputElement;
+		const priceSlider = document.getElementById('price-slider') as HTMLInputElement;
+
+		if (priceMin) priceMin.value = '0';
+		if (priceMax) priceMax.value = '500';
+		if (priceSlider) {
+			priceSlider.value = '500';
+			priceSlider.style.background = 'linear-gradient(to right, var(--primary-color) 100%, #e5e7eb 100%)';
+		}
+
+		filteredProducts = [...allProducts];
+		renderProducts();
+		updateActiveFiltersCount();
+		updateActiveFiltersTags();
+	}
+
+	function updateActiveFiltersCount() {
+		const count = currentFilters.categories.length +
+					  currentFilters.sizes.length +
+					  currentFilters.colors.length +
+					  (currentFilters.featured ? 1 : 0) +
+					  (currentFilters.sale ? 1 : 0) +
+					  (currentFilters.inStock ? 1 : 0);
+
+		const countEl = document.getElementById('active-filters-count');
+		if (countEl) {
+			if (count > 0) {
+				countEl.textContent = count.toString();
+				countEl.style.display = 'inline';
+			} else {
+				countEl.style.display = 'none';
+			}
+		}
+	}
+
+	function updateActiveFiltersTags() {
+		const container = document.getElementById('active-filters');
+		if (!container) return;
+
+		const tags: string[] = [];
+
+		currentFilters.categories.forEach((cat: string) => {
+			tags.push(`<span class="active-filter-tag" data-type="category" data-value="${cat}">${cat} ✕</span>`);
+		});
+
+		if (currentFilters.featured) {
+			tags.push(`<span class="active-filter-tag" data-type="featured">Featured ✕</span>`);
+		}
+
+		if (currentFilters.sale) {
+			tags.push(`<span class="active-filter-tag" data-type="sale">On Sale ✕</span>`);
+		}
+
+		container.innerHTML = tags.join('');
+
+		// Add click handlers to remove tags
+		container.querySelectorAll('.active-filter-tag').forEach(tag => {
+			tag.addEventListener('click', () => {
+				const type = tag.getAttribute('data-type');
+				const value = tag.getAttribute('data-value');
+
+				if (type === 'category' && value) {
+					currentFilters.categories = currentFilters.categories.filter((c: string) => c !== value);
+					const checkbox = document.querySelector(`input[data-filter="category"][value="${value}"]`) as HTMLInputElement;
+					if (checkbox) checkbox.checked = false;
+				} else if (type === 'featured') {
+					currentFilters.featured = false;
+					const checkbox = document.querySelector('input[data-filter="featured"]') as HTMLInputElement;
+					if (checkbox) checkbox.checked = false;
+				} else if (type === 'sale') {
+					currentFilters.sale = false;
+					const checkbox = document.querySelector('input[data-filter="sale"]') as HTMLInputElement;
+					if (checkbox) checkbox.checked = false;
+				}
+
+				applyFilters();
+				updateActiveFiltersCount();
+			});
+		});
+	}
 </script>
+
