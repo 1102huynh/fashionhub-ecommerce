@@ -11,6 +11,8 @@ import {
   Request,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('orders')
@@ -19,7 +21,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(@Body() createOrderDto: any, @Request() req) {
+  create(@Body() createOrderDto: CreateOrderDto, @Request() req) {
     return this.ordersService.create({
       ...createOrderDto,
       userId: req.user.id,
@@ -41,7 +43,7 @@ export class OrdersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: any) {
+  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     return this.ordersService.update(id, updateOrderDto);
   }
 
@@ -50,4 +52,3 @@ export class OrdersController {
     return this.ordersService.remove(id);
   }
 }
-

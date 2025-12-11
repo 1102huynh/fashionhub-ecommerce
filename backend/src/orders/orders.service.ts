@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order } from './entities/order.entity';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -10,7 +12,7 @@ export class OrdersService {
     private ordersRepository: Repository<Order>,
   ) {}
 
-  async create(createOrderDto: any): Promise<Order> {
+  async create(createOrderDto: CreateOrderDto): Promise<Order> {
     const orderNumber = this.generateOrderNumber();
 
     const order = this.ordersRepository.create({
@@ -58,7 +60,7 @@ export class OrdersService {
     return order;
   }
 
-  async update(id: string, updateOrderDto: any): Promise<Order> {
+  async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
     const order = await this.findOne(id);
     Object.assign(order, updateOrderDto);
     return this.ordersRepository.save(order);
@@ -75,4 +77,3 @@ export class OrdersService {
     return `ORD-${timestamp}-${random}`;
   }
 }
-
