@@ -27,7 +27,8 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
+  // Logout - no guard needed, just acknowledge the request
+  // Token invalidation would happen client-side (remove from localStorage)
   @Post('logout')
   async logout() {
     return {
