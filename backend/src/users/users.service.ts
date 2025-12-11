@@ -1,71 +1,84 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+// import { InjectRepository } from '@nestjs/typeorm';
+// import { Repository } from 'typeorm';
+// import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { mockDB } from '../database/mock-database';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-  ) {}
+  // Using mock database instead of TypeORM for now
+  // constructor(
+  //   @InjectRepository(User)
+  //   private usersRepository: Repository<User>,
+  // ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    const user = this.usersRepository.create({
+    const user = mockDB.createUser({
       ...createUserDto,
       password: hashedPassword,
+      role: createUserDto.role || 'customer',
+      isActive: true,
     });
 
-    return this.usersRepository.save(user);
+    return user;
   }
 
-  async findAll(query?: any): Promise<User[]> {
-    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+  async findAll(query?: any) {
+    let users = mockDB.getAllUsers();
 
     if (query?.role) {
-      queryBuilder.where('user.role = :role', { role: query.role });
+      users = users.filter(user => user.role === query.role);
     }
 
     if (query?.search) {
-      queryBuilder.andWhere(
-        '(user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.email ILIKE :search)',
-        { search: `%${query.search}%` },
+      const searchLower = query.search.toLowerCase();
+      users = users.filter(user =>
+        user.firstName.toLowerCase().includes(searchLower) ||
+        user.lastName.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower)
       );
     }
 
-    return queryBuilder.getMany();
+    return users;
   }
 
-  async findOne(id: string): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  async findOne(id: string) {
+    const user = mockDB.getUserById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return user;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { email } });
+  async findByEmail(email: string) {
+    return mockDB.getUserByEmail(email);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
 
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    Object.assign(user, updateUserDto);
-    return this.usersRepository.save(user);
+    const updatedUser = mockDB.updateUser(id, updateUserDto);
+    if (!updatedUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return updatedUser;
   }
 
   async remove(id: string): Promise<void> {
-    const user = await this.findOne(id);
-    await this.usersRepository.remove(user);
+    await this.findOne(id); // Check if exists
+    const deleted = mockDB.deleteUser(id);
+    if (!deleted) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
   }
 }

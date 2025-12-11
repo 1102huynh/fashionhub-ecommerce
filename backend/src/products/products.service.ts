@@ -1,59 +1,64 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Product } from './entities/product.entity';
+// import { InjectRepository } from '@nestjs/typeorm';
+// import { Repository } from 'typeorm';
+// import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { mockDB } from '../database/mock-database';
 
 @Injectable()
 export class ProductsService {
-  constructor(
-    @InjectRepository(Product)
-    private productsRepository: Repository<Product>,
-  ) {}
+  // Using mock database instead of TypeORM
+  // constructor(
+  //   @InjectRepository(Product)
+  //   private productsRepository: Repository<Product>,
+  // ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
-    const product = this.productsRepository.create(createProductDto);
-    return this.productsRepository.save(product);
+  async create(createProductDto: CreateProductDto) {
+    const product = mockDB.createProduct({
+      ...createProductDto,
+      rating: createProductDto.rating || 0,
+      reviewCount: createProductDto.reviewCount || 0,
+      featured: createProductDto.featured || false,
+      isActive: createProductDto.isActive !== false,
+    });
+    return product;
   }
 
-  async findAll(query?: any): Promise<{ products: Product[]; total: number }> {
-    const queryBuilder = this.productsRepository.createQueryBuilder('product');
+  async findAll(query?: any) {
+    let products = mockDB.getAllProducts();
 
-    queryBuilder.where('product.isActive = :isActive', { isActive: true });
+    // Filter active products
+    products = products.filter(p => p.isActive);
 
     if (query?.category) {
-      queryBuilder.andWhere('product.category = :category', {
-        category: query.category,
-      });
+      products = products.filter(p => p.category === query.category);
     }
 
     if (query?.search) {
-      queryBuilder.andWhere(
-        '(product.name ILIKE :search OR product.description ILIKE :search)',
-        { search: `%${query.search}%` },
+      const searchLower = query.search.toLowerCase();
+      products = products.filter(p =>
+        p.name.toLowerCase().includes(searchLower) ||
+        p.description.toLowerCase().includes(searchLower)
       );
     }
 
     if (query?.featured) {
-      queryBuilder.andWhere('product.featured = :featured', {
-        featured: true,
-      });
+      products = products.filter(p => p.featured === true);
     }
 
-    const page = query?.page || 1;
-    const limit = query?.limit || 10;
+    const page = parseInt(query?.page) || 1;
+    const limit = parseInt(query?.limit) || 10;
     const skip = (page - 1) * limit;
 
-    queryBuilder.skip(skip).take(limit);
+    const total = products.length;
+    const paginatedProducts = products.slice(skip, skip + limit);
 
-    const [products, total] = await queryBuilder.getManyAndCount();
-
-    return { products, total };
+    return { products: paginatedProducts, total };
   }
 
-  async findOne(id: string): Promise<Product> {
-    const product = await this.productsRepository.findOne({ where: { id } });
+  async findOne(id: string) {
+    const product = mockDB.getProductById(id);
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
@@ -62,14 +67,22 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
-    const product = await this.findOne(id);
-    Object.assign(product, updateProductDto);
-    return this.productsRepository.save(product);
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    await this.findOne(id); // Check if exists
+
+    const updatedProduct = mockDB.updateProduct(id, updateProductDto);
+    if (!updatedProduct) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    return updatedProduct;
   }
 
   async remove(id: string): Promise<void> {
-    const product = await this.findOne(id);
-    await this.productsRepository.remove(product);
+    await this.findOne(id); // Check if exists
+    const deleted = mockDB.deleteProduct(id);
+    if (!deleted) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
   }
 }

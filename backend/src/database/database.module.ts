@@ -1,24 +1,15 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+
+// Using mock database for now - will be replaced with real database later
+// When ready to use real database:
+// 1. Uncomment TypeORM imports and configuration
+// 2. Update .env with database credentials
+// 3. Run npm run start:dev
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST', 'localhost'),
-        port: configService.get('DB_PORT', 5432),
-        username: configService.get('DB_USERNAME', 'postgres'),
-        password: configService.get('DB_PASSWORD', 'postgres'),
-        database: configService.get('DB_DATABASE', 'fashionhub'),
-        entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        logging: configService.get('NODE_ENV') === 'development',
-      }),
-    }),
+    // TypeORM configuration is disabled - using mock data
+    // Enable when database is ready
   ],
 })
 export class DatabaseModule {}

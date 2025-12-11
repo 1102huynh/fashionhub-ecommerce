@@ -1,57 +1,55 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Order } from './entities/order.entity';
+// import { InjectRepository } from '@nestjs/typeorm';
+// import { Repository } from 'typeorm';
+// import { Order } from './entities/order.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { mockDB } from '../database/mock-database';
 
 @Injectable()
 export class OrdersService {
-  constructor(
-    @InjectRepository(Order)
-    private ordersRepository: Repository<Order>,
-  ) {}
+  // Using mock database instead of TypeORM
+  // constructor(
+  //   @InjectRepository(Order)
+  //   private ordersRepository: Repository<Order>,
+  // ) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    const orderNumber = this.generateOrderNumber();
-
-    const order = this.ordersRepository.create({
+  async create(createOrderDto: CreateOrderDto) {
+    const order = mockDB.createOrder({
       ...createOrderDto,
-      orderNumber,
+      userId: createOrderDto.userId || '',
+      status: 'pending',
     });
 
-    return this.ordersRepository.save(order);
+    return order;
   }
 
-  async findAll(query?: any): Promise<{ orders: Order[]; total: number }> {
-    const queryBuilder = this.ordersRepository
-      .createQueryBuilder('order')
-      .leftJoinAndSelect('order.user', 'user');
+  async findAll(query?: any) {
+    let orders = mockDB.getAllOrders();
 
     if (query?.userId) {
-      queryBuilder.where('order.userId = :userId', { userId: query.userId });
+      orders = orders.filter(o => o.userId === query.userId);
     }
 
     if (query?.status) {
-      queryBuilder.andWhere('order.status = :status', { status: query.status });
+      orders = orders.filter(o => o.status === query.status);
     }
 
-    const page = query?.page || 1;
-    const limit = query?.limit || 10;
+    // Sort by createdAt descending
+    orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const page = parseInt(query?.page) || 1;
+    const limit = parseInt(query?.limit) || 10;
     const skip = (page - 1) * limit;
 
-    queryBuilder.skip(skip).take(limit).orderBy('order.createdAt', 'DESC');
+    const total = orders.length;
+    const paginatedOrders = orders.slice(skip, skip + limit);
 
-    const [orders, total] = await queryBuilder.getManyAndCount();
-
-    return { orders, total };
+    return { orders: paginatedOrders, total };
   }
 
-  async findOne(id: string): Promise<Order> {
-    const order = await this.ordersRepository.findOne({
-      where: { id },
-      relations: ['user'],
-    });
+  async findOne(id: string) {
+    const order = mockDB.getOrderById(id);
 
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
@@ -60,20 +58,22 @@ export class OrdersService {
     return order;
   }
 
-  async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
-    const order = await this.findOne(id);
-    Object.assign(order, updateOrderDto);
-    return this.ordersRepository.save(order);
+  async update(id: string, updateOrderDto: UpdateOrderDto) {
+    await this.findOne(id); // Check if exists
+
+    const updatedOrder = mockDB.updateOrder(id, updateOrderDto);
+    if (!updatedOrder) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    return updatedOrder;
   }
 
   async remove(id: string): Promise<void> {
-    const order = await this.findOne(id);
-    await this.ordersRepository.remove(order);
-  }
-
-  private generateOrderNumber(): string {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000);
-    return `ORD-${timestamp}-${random}`;
+    await this.findOne(id); // Check if exists
+    const deleted = mockDB.deleteOrder(id);
+    if (!deleted) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
   }
 }
