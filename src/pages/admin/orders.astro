@@ -323,6 +323,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 <script>
   import { orderManager } from '../../stores/orders';
 
+  const API_BASE_URL = 'http://localhost:3001/api';
   let allOrders: any[] = [];
 
   async function loadOrders() {
@@ -335,8 +336,31 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         return;
       }
 
-      // Load all orders (in production, this would be all users' orders)
-      allOrders = orderManager.getUserOrders(user.id);
+      // Try to fetch from backend API first
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(`${API_BASE_URL}/orders`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.orders && data.orders.length > 0) {
+            allOrders = data.orders;
+            console.log('Loaded orders from backend API');
+          } else {
+            // Fallback to local orders
+            allOrders = orderManager.getLocalOrders();
+          }
+        } else {
+          allOrders = orderManager.getLocalOrders();
+        }
+      } catch (error) {
+        console.log('Backend not available, using local orders');
+        allOrders = orderManager.getLocalOrders();
+      }
 
       // Update stats
       updateStats(allOrders);

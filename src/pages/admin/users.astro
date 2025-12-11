@@ -258,8 +258,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 </style>
 
 <script>
-  // Mock users data
-  const mockUsers = [
+  const API_BASE_URL = 'http://localhost:3001/api';
+
+  // Mock users data as fallback
+  let users = [
     {
       id: 'user_1',
       firstName: 'John',
@@ -292,16 +294,44 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
   ];
 
+  // Fetch users from backend API
+  async function fetchUsers() {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          users = data.map(u => ({
+            ...u,
+            orders: u.orders || 0,
+            totalSpent: u.totalSpent || 0,
+            createdAt: new Date(u.createdAt)
+          }));
+          console.log('Loaded users from backend API');
+        }
+      }
+    } catch (error) {
+      console.log('Backend not available, using mock users');
+    }
+    loadUsers();
+  }
+
   function loadUsers() {
     const tbody = document.getElementById('users-table-body');
     if (!tbody) return;
 
     // Update stats
-    document.getElementById('total-users')!.textContent = mockUsers.length.toString();
-    document.getElementById('active-users')!.textContent = Math.floor(mockUsers.length * 0.7).toString();
-    document.getElementById('new-users')!.textContent = '8';
+    document.getElementById('total-users')!.textContent = users.length.toString();
+    document.getElementById('active-users')!.textContent = Math.floor(users.length * 0.7).toString();
+    document.getElementById('new-users')!.textContent = Math.min(users.length, 8).toString();
 
-    tbody.innerHTML = mockUsers.map(user => {
+    tbody.innerHTML = users.map(user => {
       const initials = `${user.firstName[0]}${user.lastName[0]}`;
 
       return `
@@ -335,9 +365,29 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     alert(`Edit user ${userId} - Feature coming soon!`);
   }
 
-  function deleteUser(userId: string) {
+  async function deleteUser(userId: string) {
     if (confirm('Are you sure you want to delete this user?')) {
-      alert(`Delete user ${userId} - Feature coming soon!`);
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          users = users.filter(u => u.id !== userId);
+          loadUsers();
+          alert('User deleted successfully!');
+        } else {
+          alert('Failed to delete user');
+        }
+      } catch (error) {
+        users = users.filter(u => u.id !== userId);
+        loadUsers();
+        alert('User removed (locally)');
+      }
     }
   }
 
@@ -345,8 +395,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   (window as any).editUser = editUser;
   (window as any).deleteUser = deleteUser;
 
-  // Load users
-  loadUsers();
+  // Load users from API
+  fetchUsers();
 
   // Role filter
   document.getElementById('role-filter')?.addEventListener('change', (e) => {

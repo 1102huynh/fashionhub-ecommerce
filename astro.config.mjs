@@ -2,7 +2,6 @@
 import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 
-// https://astro.build/config
 export default defineConfig({
   output: 'server',
   adapter: node({
@@ -11,11 +10,11 @@ export default defineConfig({
   server: {
     port: 4321,
     host: true,
-    strictPort: true, // Don't use random port if 4321 is taken
+    strictPort: true // Không tự đổi sang port khác
   },
   vite: {
     define: {
-      global: 'globalThis',
+      global: 'globalThis' // Fix một số package Node cần "global"
     }
   }
 });

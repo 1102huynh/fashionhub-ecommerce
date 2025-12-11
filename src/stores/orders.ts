@@ -1,6 +1,7 @@
-// Order management store
-import { nanoid } from 'nanoid';
+// Order management store - Uses Backend API
 import type { CartItem } from '../types/ecommerce.js';
+
+const API_BASE_URL = 'http://localhost:3001/api';
 
 export interface ShippingAddress {
   firstName: string;
@@ -26,9 +27,9 @@ export interface Order {
   orderNumber: string;
   items: CartItem[];
   shippingAddress: ShippingAddress;
-  billingAddress: ShippingAddress;
+  billingAddress?: ShippingAddress;
   paymentInfo: PaymentInfo;
-  shippingMethod: 'standard' | 'express' | 'overnight';
+  shippingMethod?: 'standard' | 'express' | 'overnight';
   shippingCost: number;
   subtotal: number;
   tax: number;
@@ -38,30 +39,58 @@ export interface Order {
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   createdAt: Date;
   updatedAt: Date;
-  estimatedDelivery: Date;
+  estimatedDelivery?: Date;
   trackingNumber?: string;
 }
 
 class OrderManager {
   private readonly STORAGE_KEY = 'fashionhub_orders';
 
-  // Get all orders for current user
-  getUserOrders(userId: string): Order[] {
+  private getToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('auth_token');
+  }
+
+  // Get all orders for current user from backend
+  async fetchUserOrders(): Promise<Order[]> {
+    try {
+      const token = this.getToken();
+      if (!token) {
+        return this.getLocalOrders();
+      }
+
+      const response = await fetch(`${API_BASE_URL}/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.orders || [];
+      }
+    } catch (error) {
+      console.error('Fetch orders error:', error);
+    }
+
+    // Fallback to local storage
+    return this.getLocalOrders();
+  }
+
+  // Get orders from local storage (fallback)
+  getLocalOrders(): Order[] {
     if (typeof window === 'undefined') return [];
 
     try {
       const ordersData = localStorage.getItem(this.STORAGE_KEY);
       if (ordersData) {
         const allOrders = JSON.parse(ordersData);
-        return allOrders
-          .filter((order: any) => order.userId === userId)
-          .map((order: any) => ({
-            ...order,
-            createdAt: new Date(order.createdAt),
-            updatedAt: new Date(order.updatedAt),
-            estimatedDelivery: new Date(order.estimatedDelivery)
-          }))
-          .sort((a: Order, b: Order) => b.createdAt.getTime() - a.createdAt.getTime());
+        return allOrders.map((order: any) => ({
+          ...order,
+          createdAt: new Date(order.createdAt),
+          updatedAt: new Date(order.updatedAt),
+          estimatedDelivery: order.estimatedDelivery ? new Date(order.estimatedDelivery) : undefined,
+        }));
       }
     } catch (error) {
       console.error('Error reading orders:', error);
@@ -70,107 +99,134 @@ class OrderManager {
     return [];
   }
 
-  // Get single order by ID
-  getOrder(orderId: string): Order | null {
-    if (typeof window === 'undefined') return null;
+  // Synchronous method for backward compatibility
+  getUserOrders(userId: string): Order[] {
+    const orders = this.getLocalOrders();
+    return orders.filter(o => o.userId === userId || o.userId === 'local-user');
+  }
 
+  // Get order statistics
+  getOrderStats(userId: string): { total: number; pending: number; completed: number; totalSpent: number } {
+    const orders = this.getUserOrders(userId);
+    return {
+      total: orders.length,
+      pending: orders.filter(o => o.status === 'pending' || o.status === 'processing').length,
+      completed: orders.filter(o => o.status === 'delivered').length,
+      totalSpent: orders.reduce((sum, o) => sum + o.total, 0),
+    };
+  }
+
+  // Get single order by ID
+  async getOrderById(orderId: string): Promise<Order | null> {
     try {
-      const ordersData = localStorage.getItem(this.STORAGE_KEY);
-      if (ordersData) {
-        const allOrders = JSON.parse(ordersData);
-        const order = allOrders.find((o: any) => o.id === orderId);
-        if (order) {
-          return {
-            ...order,
-            createdAt: new Date(order.createdAt),
-            updatedAt: new Date(order.updatedAt),
-            estimatedDelivery: new Date(order.estimatedDelivery)
-          };
+      const token = this.getToken();
+      if (token) {
+        const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          return await response.json();
         }
       }
     } catch (error) {
-      console.error('Error reading order:', error);
+      console.error('Fetch order error:', error);
     }
 
-    return null;
+    // Fallback to local storage
+    const orders = this.getLocalOrders();
+    return orders.find(o => o.id === orderId) || null;
   }
 
   // Create new order
   async createOrder(orderData: {
-    userId: string;
     items: CartItem[];
     shippingAddress: ShippingAddress;
-    billingAddress: ShippingAddress;
     paymentInfo: PaymentInfo;
-    shippingMethod: 'standard' | 'express' | 'overnight';
-    shippingCost: number;
     subtotal: number;
+    shippingCost: number;
     tax: number;
     total: number;
-    promoCode?: string;
-    discount?: number;
   }): Promise<{ success: boolean; order?: Order; error?: string }> {
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const token = this.getToken();
 
-      // Calculate estimated delivery
-      const estimatedDelivery = new Date();
-      switch (orderData.shippingMethod) {
-        case 'overnight':
-          estimatedDelivery.setDate(estimatedDelivery.getDate() + 1);
-          break;
-        case 'express':
-          estimatedDelivery.setDate(estimatedDelivery.getDate() + 3);
-          break;
-        case 'standard':
-        default:
-          estimatedDelivery.setDate(estimatedDelivery.getDate() + 7);
-          break;
+      if (token) {
+        const response = await fetch(`${API_BASE_URL}/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(orderData)
+        });
+
+        if (response.ok) {
+          const order = await response.json();
+          this.saveOrderLocally(order);
+          this.dispatchOrderEvent();
+          return { success: true, order };
+        } else {
+          const error = await response.json();
+          return { success: false, error: error.message || 'Failed to create order' };
+        }
       }
-
-      // Create order object
-      const order: Order = {
-        id: nanoid(),
-        orderNumber: 'ORD-' + Date.now().toString(36).toUpperCase(),
-        userId: orderData.userId,
-        items: orderData.items,
-        shippingAddress: orderData.shippingAddress,
-        billingAddress: orderData.billingAddress,
-        paymentInfo: orderData.paymentInfo,
-        shippingMethod: orderData.shippingMethod,
-        shippingCost: orderData.shippingCost,
-        subtotal: orderData.subtotal,
-        tax: orderData.tax,
-        total: orderData.total,
-        promoCode: orderData.promoCode,
-        discount: orderData.discount,
-        status: 'pending',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        estimatedDelivery: estimatedDelivery,
-        trackingNumber: 'TRK' + nanoid(10).toUpperCase()
-      };
-
-      // Save order
-      this.saveOrder(order);
-
-      // Dispatch event
-      this.dispatchOrderEvent();
-
-      return { success: true, order };
     } catch (error) {
-      console.error('Order creation error:', error);
-      return { success: false, error: 'Failed to create order. Please try again.' };
+      console.error('Create order API error:', error);
     }
+
+    // Fallback: create locally
+    return this.createLocalOrder(orderData);
   }
 
-  // Save order to storage
-  private saveOrder(order: Order): void {
+  // Create order locally (fallback)
+  private createLocalOrder(orderData: {
+    items: CartItem[];
+    shippingAddress: ShippingAddress;
+    paymentInfo: PaymentInfo;
+    subtotal: number;
+    shippingCost: number;
+    tax: number;
+    total: number;
+  }): { success: boolean; order?: Order; error?: string } {
+    const order: Order = {
+      id: `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId: 'local-user',
+      orderNumber: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      items: orderData.items,
+      shippingAddress: orderData.shippingAddress,
+      paymentInfo: orderData.paymentInfo,
+      shippingCost: orderData.shippingCost,
+      subtotal: orderData.subtotal,
+      tax: orderData.tax,
+      total: orderData.total,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    };
+
+    this.saveOrderLocally(order);
+    this.dispatchOrderEvent();
+    return { success: true, order };
+  }
+
+  // Save order to local storage
+  private saveOrderLocally(order: Order): void {
+    if (typeof window === 'undefined') return;
+
     try {
-      const ordersData = localStorage.getItem(this.STORAGE_KEY);
-      const orders = ordersData ? JSON.parse(ordersData) : [];
-      orders.push(order);
+      const orders = this.getLocalOrders();
+      const existingIndex = orders.findIndex(o => o.id === order.id);
+
+      if (existingIndex >= 0) {
+        orders[existingIndex] = order;
+      } else {
+        orders.unshift(order);
+      }
+
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(orders));
     } catch (error) {
       console.error('Error saving order:', error);
@@ -178,70 +234,44 @@ class OrderManager {
   }
 
   // Update order status
-  updateOrderStatus(orderId: string, status: Order['status']): { success: boolean; error?: string } {
+  async updateOrderStatus(orderId: string, status: Order['status']): Promise<boolean> {
     try {
-      const ordersData = localStorage.getItem(this.STORAGE_KEY);
-      if (!ordersData) {
-        return { success: false, error: 'Order not found' };
+      const token = this.getToken();
+      if (token) {
+        const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ status })
+        });
+
+        if (response.ok) {
+          const updatedOrder = await response.json();
+          this.saveOrderLocally(updatedOrder);
+          this.dispatchOrderEvent();
+          return true;
+        }
       }
+    } catch (error) {
+      console.error('Update order error:', error);
+    }
 
-      const orders = JSON.parse(ordersData);
-      const orderIndex = orders.findIndex((o: any) => o.id === orderId);
-
-      if (orderIndex === -1) {
-        return { success: false, error: 'Order not found' };
-      }
-
-      orders[orderIndex].status = status;
-      orders[orderIndex].updatedAt = new Date();
-
+    // Fallback: update locally
+    const orders = this.getLocalOrders();
+    const index = orders.findIndex(o => o.id === orderId);
+    if (index >= 0) {
+      orders[index].status = status;
+      orders[index].updatedAt = new Date();
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(orders));
       this.dispatchOrderEvent();
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      return { success: false, error: 'Failed to update order' };
+      return true;
     }
+
+    return false;
   }
 
-  // Cancel order
-  cancelOrder(orderId: string): { success: boolean; error?: string } {
-    try {
-      const order = this.getOrder(orderId);
-      if (!order) {
-        return { success: false, error: 'Order not found' };
-      }
-
-      if (order.status === 'shipped' || order.status === 'delivered') {
-        return { success: false, error: 'Cannot cancel shipped or delivered orders' };
-      }
-
-      return this.updateOrderStatus(orderId, 'cancelled');
-    } catch (error) {
-      console.error('Error cancelling order:', error);
-      return { success: false, error: 'Failed to cancel order' };
-    }
-  }
-
-  // Get order statistics
-  getOrderStats(userId: string): {
-    totalOrders: number;
-    totalSpent: number;
-    pendingOrders: number;
-    completedOrders: number;
-  } {
-    const orders = this.getUserOrders(userId);
-
-    return {
-      totalOrders: orders.length,
-      totalSpent: orders.reduce((sum, order) => sum + order.total, 0),
-      pendingOrders: orders.filter(o => o.status === 'pending' || o.status === 'processing').length,
-      completedOrders: orders.filter(o => o.status === 'delivered').length
-    };
-  }
-
-  // Dispatch order update event
   private dispatchOrderEvent(): void {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('orders-updated'));
@@ -249,6 +279,5 @@ class OrderManager {
   }
 }
 
-// Export singleton instance
 export const orderManager = new OrderManager();
 
