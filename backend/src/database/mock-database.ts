@@ -58,6 +58,7 @@ class MockDatabase {
   private users: Map<string, MockUser> = new Map();
   private products: Map<string, MockProduct> = new Map();
   private orders: Map<string, MockOrder> = new Map();
+  private initialized = false;
 
   constructor() {
     this.seedData();
@@ -65,39 +66,59 @@ class MockDatabase {
 
   private seedData() {
     // Seed some initial data
-    this.createInitialUsers();
     this.createInitialProducts();
+    // Users will be created with hashed passwords in initUsers()
   }
 
+  // Call this method after bcrypt is available
+  async initUsers() {
+    if (this.initialized) return;
+
+    try {
+      const bcrypt = await import('bcrypt');
+
+      const adminPassword = await bcrypt.hash('admin123', 10);
+      const customerPassword = await bcrypt.hash('customer123', 10);
+
+      const adminUser: MockUser = {
+        id: 'user-admin-001',
+        email: 'admin@fashionhub.com',
+        password: adminPassword,
+        firstName: 'Admin',
+        lastName: 'User',
+        phone: '1234567890',
+        role: 'admin',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const customerUser: MockUser = {
+        id: 'user-customer-001',
+        email: 'customer@example.com',
+        password: customerPassword,
+        firstName: 'John',
+        lastName: 'Doe',
+        phone: '0987654321',
+        role: 'customer',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      this.users.set(adminUser.id, adminUser);
+      this.users.set(customerUser.id, customerUser);
+      this.initialized = true;
+
+      console.log('✅ Mock users initialized with hashed passwords');
+    } catch (error) {
+      console.error('Failed to init users:', error);
+    }
+  }
+
+  // Synchronous fallback - creates users without proper hash (for backwards compat)
   private createInitialUsers() {
-    const adminUser: MockUser = {
-      id: 'user-admin-001',
-      email: 'admin@fashionhub.com',
-      password: '$2b$10$YQp5ZYJhH1xLK0hK0hK0hOqGqGqGqGqGqGqGqGqGqGqGqGqGqGqGq', // password: admin123
-      firstName: 'Admin',
-      lastName: 'User',
-      phone: '1234567890',
-      role: 'admin',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const customerUser: MockUser = {
-      id: 'user-customer-001',
-      email: 'customer@example.com',
-      password: '$2b$10$YQp5ZYJhH1xLK0hK0hK0hOqGqGqGqGqGqGqGqGqGqGqGqGqGqGqGq', // password: customer123
-      firstName: 'John',
-      lastName: 'Doe',
-      phone: '0987654321',
-      role: 'customer',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    this.users.set(adminUser.id, adminUser);
-    this.users.set(customerUser.id, customerUser);
+    // This is now empty - users created via initUsers() with proper hashing
   }
 
   private createInitialProducts() {

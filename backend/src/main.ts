@@ -1,8 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { mockDB } from './database/mock-database';
 
 async function bootstrap() {
+  // Initialize mock database with hashed passwords
+  await mockDB.initUsers();
+
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS
