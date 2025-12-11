@@ -892,14 +892,14 @@ const colors = mockColors;
 		color: #1f2937;
 	}
 
-	.product-grid .wishlist-btn {
+	.product-grid .add-to-cart-btn {
 		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.375rem;
 		padding: 0.75rem;
-		background: linear-gradient(135deg, #ec4899, #f43f5e);
+		background: linear-gradient(135deg, #6366f1, #8b5cf6);
 		color: white;
 		border: none;
 		border-radius: 0.5rem;
@@ -909,19 +909,14 @@ const colors = mockColors;
 		font-size: 0.8rem;
 	}
 
-	.product-grid .wishlist-btn:hover {
-		background: linear-gradient(135deg, #db2777, #e11d48);
+	.product-grid .add-to-cart-btn:hover {
+		background: linear-gradient(135deg, #4f46e5, #7c3aed);
 		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 	}
 
-	.product-grid .wishlist-btn.added {
+	.product-grid .add-to-cart-btn.added {
 		background: linear-gradient(135deg, #10b981, #059669);
-	}
-
-	.product-grid .wishlist-btn.added:hover {
-		background: linear-gradient(135deg, #059669, #047857);
-		box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 	}
 </style>
 
@@ -1173,10 +1168,6 @@ const colors = mockColors;
 				const hasDiscount = product.salePrice && product.salePrice < product.price;
 				const discountPercent = hasDiscount ? Math.round((1 - product.salePrice / product.price) * 100) : 0;
 
-				// Check if product is in wishlist
-				const wishlist = JSON.parse(localStorage.getItem('fashionhub_wishlist') || '[]');
-				const isInWishlist = wishlist.includes(product.id);
-
 				return `
 					<div class="product-card" data-product-id="${product.id}">
 						<a href="/products/${product.id}" class="product-link">
@@ -1200,11 +1191,13 @@ const colors = mockColors;
 						</a>
 						<div class="product-actions">
 							<a href="/products/${product.id}" class="view-details-btn">View Details</a>
-							<button class="wishlist-btn ${isInWishlist ? 'added' : ''}" data-product-id="${product.id}">
-								<svg width="16" height="16" viewBox="0 0 24 24" fill="${isInWishlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-									<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+							<button class="add-to-cart-btn" data-product-id="${product.id}">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<circle cx="9" cy="21" r="1"></circle>
+									<circle cx="20" cy="21" r="1"></circle>
+									<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
 								</svg>
-								${isInWishlist ? 'Added' : 'Wishlist'}
+								Add to Cart
 							</button>
 						</div>
 					</div>
@@ -1216,39 +1209,42 @@ const colors = mockColors;
 			productsCount.textContent = `${filteredProducts.length} products`;
 		}
 
-		// Add wishlist button handlers
-		document.querySelectorAll('.product-grid .wishlist-btn').forEach(btn => {
-			btn.addEventListener('click', (e) => {
+		// Add to cart button handlers
+		document.querySelectorAll('.product-grid .add-to-cart-btn').forEach(btn => {
+			btn.addEventListener('click', async (e) => {
 				e.preventDefault();
 				const productId = btn.getAttribute('data-product-id');
 				if (!productId) return;
 
-				let wishlist = JSON.parse(localStorage.getItem('fashionhub_wishlist') || '[]');
+				// Import cart manager and mock products
+				const { cartManager } = await import('../stores/cart.js');
+				const product = filteredProducts.find(p => p.id === productId);
 
-				if (wishlist.includes(productId)) {
-					// Remove from wishlist
-					wishlist = wishlist.filter((id: string) => id !== productId);
-					btn.classList.remove('added');
+				if (product) {
+					cartManager.addItem({
+						productId: product.id,
+						product: product,
+						quantity: 1,
+						selectedSize: product.sizes?.[0] || { id: 'M', name: 'M' },
+						selectedColor: product.colors?.[0] || { id: 'default', name: 'Default', value: '#000' }
+					});
+
+					// Show feedback
+					btn.classList.add('added');
+					const originalHTML = btn.innerHTML;
 					btn.innerHTML = `
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+							<polyline points="20 6 9 17 4 12"></polyline>
 						</svg>
-						Wishlist
+						Added!
 					`;
-				} else {
-					// Add to wishlist
-					wishlist.push(productId);
-					btn.classList.add('added');
-					btn.innerHTML = `
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-							<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-						</svg>
-						Added
-					`;
-				}
 
-				localStorage.setItem('fashionhub_wishlist', JSON.stringify(wishlist));
-				window.dispatchEvent(new CustomEvent('wishlist-updated'));
+					// Reset after 2 seconds
+					setTimeout(() => {
+						btn.classList.remove('added');
+						btn.innerHTML = originalHTML;
+					}, 2000);
+				}
 			});
 		});
 	}
